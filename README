@@ -1,0 +1,21 @@
+meta-fsl-ivi, Freescale In-Vehicle Infotainment
+=====================================================
+
+This layer's purpose is to add specific Freescale support
+for In-Vehicle Infotainment based on GENIVI meta-ivi layer
+
+Layer dependencies
+------------------
+
+URI: git://git.yoctoproject.org/poky
+branch: danny
+revision: 47b0864fbd65746558d8186450c182d98bac78ca
+
+URI: git://git.yoctoproject.org/meta-fsl-arm
+branch: danny
+revision: 968409f066ad88cba500a585e2f6a9b680b8ff52
+
+URI: git://git.openembedded.org/meta-ivi
+branch: 3.0
+revision: 61c463f5626bed15e8c7b5a82e937aa9c1be2b29
+
