@@ -1,0 +1,28 @@
+From cc0385ab1addc6f958f9f7e6051d61fc581d2f3b Mon Sep 17 00:00:00 2001
+From: Adrian Alonso <aalonso@freescale.com>
+Date: Wed, 23 Jan 2013 15:26:55 -0600
+Subject: [PATCH] FindEGL.cmake: add prefix for FSL EGL-x11 prebuilt lib
+
+* Add prefix for FSL EGL-x11 prebuilt lib
+
+Signed-off-by: Adrian Alonso <aalonso@freescale.com>
+---
+ cmake/modules/FindEGL.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/modules/FindEGL.cmake b/cmake/modules/FindEGL.cmake
+index ed5671b..5c9e04d 100644
+--- a/cmake/modules/FindEGL.cmake
++++ b/cmake/modules/FindEGL.cmake
+@@ -22,7 +22,7 @@ FIND_PATH(EGL_INCLUDE_DIR EGL/egl.h
+ )
+ 
+ FIND_LIBRARY(EGL_LIBRARY
+-NAMES EGL
++NAMES EGL-x11
+ PATHS 
+ )
+ 
+-- 
+1.7.11.7
+
