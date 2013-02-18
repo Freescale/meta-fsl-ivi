@@ -1,0 +1,29 @@
+From 546c18c588bcbb58908de124914f57e2ce25b55e Mon Sep 17 00:00:00 2001
+From: Adrian Alonso <aalonso@freescale.com>
+Date: Thu, 31 Jan 2013 19:03:43 -0600
+Subject: [PATCH] VFBMXGALRenderer: fix config.h no such of file
+
+* Fix config.h no such of file
+* include config project path
+
+Signed-off-by: Adrian Alonso <aalonso@freescale.com>
+Upstream-Status: Pending
+---
+ LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/CMakeLists.txt b/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/CMakeLists.txt
+index bb180bc..284b448 100644
+--- a/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/CMakeLists.txt
++++ b/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/CMakeLists.txt
+@@ -23,6 +23,7 @@ include_directories ("include")
+ include_directories ("../../Base/include")
+ include_directories ("../../Graphic/include")
+ 
++include_directories ("${PROJECT_SOURCE_DIR}/config")
+ include_directories ("${PROJECT_SOURCE_DIR}/LayerManagerService/include")
+ link_directories ("${PROJECT_SOURCE_DIR}/LayerManagerService/bin")
+ include_directories ("${PROJECT_SOURCE_DIR}/LayerManagerUtils/include")
+-- 
+1.8.1
+

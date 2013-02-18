@@ -1,0 +1,54 @@
+From 84b54daaf59ed017899b964d105d330dfc564459 Mon Sep 17 00:00:00 2001
+From: Adrian Alonso <aalonso@freescale.com>
+Date: Thu, 14 Feb 2013 11:03:48 -0600
+Subject: [PATCH] MXGALGraphicSystem: remove noise verbose log messages
+
+* Remove noise verbose log messages
+* When executing LayerManagerService log messages
+  prevent to have control over terminal.
+
+Signed-off-by: Adrian Alonso <aalonso@freescale.com>
+Upstream-Status: Pending
+---
+ .../Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp    |    4 ++--
+ .../Renderers/Graphic/src/WindowSystems/VFBWindowSystem.cpp        |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp b/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp
+index e5b151a..10bd70d 100644
+--- a/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp
++++ b/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp
+@@ -64,7 +64,7 @@ bool MXGALGraphicsystem::updateRenderTarget(gceSURF_ROTATION rotation)
+ void MXGALGraphicsystem::activateGraphicContext()
+ {
+     gceSTATUS status;
+-    LOG_DEBUG("MXGALGraphicsystem", "Activating graphic context ");
++    // LOG_DEBUG("MXGALGraphicsystem", "Activating graphic context ");
+ 
+     do {
+         status = gcoHAL_GetHardwareType(gcvNULL, &m_currentHardwareType);
+@@ -89,7 +89,7 @@ void MXGALGraphicsystem::activateGraphicContext()
+ void MXGALGraphicsystem::releaseGraphicContext() 
+ {
+     gceSTATUS status;
+-    LOG_DEBUG("MXGALGraphicsystem", "Releasing graphic context ");
++    // LOG_DEBUG("MXGALGraphicsystem", "Releasing graphic context ");
+ 
+     status = gcoHAL_SetHardwareType(gcvNULL, m_currentHardwareType);
+     if (status < 0)
+diff --git a/LayerManagerPlugins/Renderers/Graphic/src/WindowSystems/VFBWindowSystem.cpp b/LayerManagerPlugins/Renderers/Graphic/src/WindowSystems/VFBWindowSystem.cpp
+index 3ec13cc..c47d062 100644
+--- a/LayerManagerPlugins/Renderers/Graphic/src/WindowSystems/VFBWindowSystem.cpp
++++ b/LayerManagerPlugins/Renderers/Graphic/src/WindowSystems/VFBWindowSystem.cpp
+@@ -104,7 +104,7 @@ void CalculateFPS()
+         FPS = ((float)(Frame)) / timeSinceLastCalc;
+         char floatStringBuffer[256];
+         sprintf(floatStringBuffer, "FPS: %f", FPS);
+-        LOG_INFO("VFBWindowSystem", floatStringBuffer);
++        // LOG_INFO("VFBWindowSystem", floatStringBuffer);
+         tv0 = tv;
+         Frame = 0;
+     }
+-- 
+1.7.10.4
+

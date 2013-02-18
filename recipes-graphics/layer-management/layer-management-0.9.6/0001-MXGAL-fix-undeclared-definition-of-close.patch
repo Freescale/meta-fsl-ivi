@@ -1,0 +1,42 @@
+From 650963bcb91fa0400219342973615cce3de73630 Mon Sep 17 00:00:00 2001
+From: Adrian Alonso <aalonso@freescale.com>
+Date: Thu, 31 Jan 2013 18:50:04 -0600
+Subject: [PATCH] MXGAL fix undeclared definition of close
+
+* Fix undeclared definition of close
+* Add unistd header
+
+Signed-off-by: Adrian Alonso <aalonso@freescale.com>
+Upstream-Status: Pending
+---
+ .../Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp          | 1 +
+ LayerManagerPlugins/Renderers/Graphic/src/TextureBinders/VFBMXGAL.cpp    | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp b/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp
+index b05fdb0..e5b151a 100644
+--- a/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp
++++ b/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp
+@@ -21,6 +21,7 @@
+ #include <sys/stat.h> 
+ #include <fcntl.h>
+ #include <stropts.h>
++#include <unistd.h>
+ 
+ #include "GraphicSystems/MXGALGraphicSystem.h"
+ #include "IlmMatrix.h"
+diff --git a/LayerManagerPlugins/Renderers/Graphic/src/TextureBinders/VFBMXGAL.cpp b/LayerManagerPlugins/Renderers/Graphic/src/TextureBinders/VFBMXGAL.cpp
+index e7dda8c..daa0708 100644
+--- a/LayerManagerPlugins/Renderers/Graphic/src/TextureBinders/VFBMXGAL.cpp
++++ b/LayerManagerPlugins/Renderers/Graphic/src/TextureBinders/VFBMXGAL.cpp
+@@ -22,6 +22,7 @@
+ #include <sys/stat.h> 
+ #include <fcntl.h>
+ #include <stropts.h>
++#include <unistd.h>
+ #include <HAL/gc_hal.h>
+ #include <HAL/gc_hal_raster.h>
+ #include "TextureBinders/VFBMXGAL.h"
+-- 
+1.8.1
+

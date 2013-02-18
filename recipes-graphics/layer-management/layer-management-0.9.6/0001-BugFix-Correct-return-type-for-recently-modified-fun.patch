@@ -1,0 +1,29 @@
+From 8f0eba551c4b1b7bb8152da45a12cb0032c0b92f Mon Sep 17 00:00:00 2001
+From: Rahul Singhal <rasinghal@nvidia.com>
+Date: Fri, 4 May 2012 10:53:48 +0530
+Subject: [PATCH] BugFix: Correct return type for recently modified functions
+
+This is needed to compile unit tests.
+Upstream-Status: Backport 0.9.7
+---
+ .../DBUSCommunicator/test/mock_Layerlist.h         |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/LayerManagerPlugins/Communicators/DBUSCommunicator/test/mock_Layerlist.h b/LayerManagerPlugins/Communicators/DBUSCommunicator/test/mock_Layerlist.h
+index 90a8059..b1e8193 100644
+--- a/LayerManagerPlugins/Communicators/DBUSCommunicator/test/mock_Layerlist.h
++++ b/LayerManagerPlugins/Communicators/DBUSCommunicator/test/mock_Layerlist.h
+@@ -28,8 +28,8 @@ class MockLayerList : public Scene {
+   MOCK_METHOD1(createSurface, Surface*(unsigned int));
+   MOCK_METHOD1(createLayerGroup, LayerGroup*(unsigned int));
+   MOCK_METHOD1(createSurfaceGroup, SurfaceGroup*(unsigned int));
+-  MOCK_METHOD1(removeLayer, void(Layer*));
+-  MOCK_METHOD1(removeSurface, void(Surface*));
++  MOCK_METHOD1(removeLayer, bool(Layer*));
++  MOCK_METHOD1(removeSurface, bool(Surface*));
+   MOCK_CONST_METHOD1(getLayer, Layer*(unsigned int));
+   MOCK_CONST_METHOD1(getSurface, Surface*(unsigned int));
+   MOCK_CONST_METHOD1(getSurfaceGroup, SurfaceGroup*(unsigned int));
+-- 
+1.7.2.5
+

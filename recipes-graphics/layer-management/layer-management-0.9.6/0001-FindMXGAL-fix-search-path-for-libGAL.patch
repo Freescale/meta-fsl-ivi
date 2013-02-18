@@ -1,0 +1,29 @@
+From 4a10ff988e528ae2d476f6138086c547c9d49172 Mon Sep 17 00:00:00 2001
+From: Adrian Alonso <aalonso@freescale.com>
+Date: Thu, 31 Jan 2013 17:43:02 -0600
+Subject: [PATCH] FindMXGAL: fix search path for libGAL
+
+* Fix search for libGAL include heders path
+
+Signed-off-by: Adrian Alonso <aalonso@freescale.com>
+Upstream-Status: Pending
+---
+ cmake/modules/FindMXGAL.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/modules/FindMXGAL.cmake b/cmake/modules/FindMXGAL.cmake
+index 6cfae00..92383f3 100644
+--- a/cmake/modules/FindMXGAL.cmake
++++ b/cmake/modules/FindMXGAL.cmake
+@@ -18,7 +18,7 @@
+ #
+ ############################################################################
+ 
+-FIND_PATH(MXGAL_INCLUDE_DIR GAL/HAL/gc_hal.h
++FIND_PATH(MXGAL_INCLUDE_DIR HAL/gc_hal.h
+ /usr/include
+ )
+ 
+-- 
+1.8.1
+

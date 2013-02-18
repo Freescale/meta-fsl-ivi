@@ -1,0 +1,28 @@
+From 1d8cf2756943408e731594ff5f6a40dfd0a90360 Mon Sep 17 00:00:00 2001
+From: Adrian Alonso <aalonso@freescale.com>
+Date: Tue, 5 Feb 2013 12:19:37 -0600
+Subject: [PATCH] OpenGLES2App include unistd.h as usleep is used
+
+* Include unistd.h for usleep
+
+Signed-off-by: Adrian Alonso <aalonso@freescale.com>
+Upstream-Status: Pending
+---
+ LayerManagerExamples/EGLVFBMockNavigation/src/OpenGLES2App.cpp |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/OpenGLES2App.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/OpenGLES2App.cpp
+index 31bf0f4..3542739 100644
+--- a/LayerManagerExamples/EGLVFBMockNavigation/src/OpenGLES2App.cpp
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/OpenGLES2App.cpp
+@@ -28,6 +28,7 @@ using std::endl;
+ #include <stdlib.h>
+ #include <math.h>
+ #include <sys/time.h>
++#include <unistd.h>
+ 
+ #define RUNTIME_IN_MS() (GetTickCount() - startTimeInMS)
+ 
+-- 
+1.7.10.4
+

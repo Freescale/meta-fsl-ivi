@@ -1,0 +1,1705 @@
+From eb1083f263ab1a0687fa4544e094f1269d654441 Mon Sep 17 00:00:00 2001
+From: Philip Hatcher <philip.hatcher@freecale.com>
+Date: Thu, 3 May 2012 10:06:09 -0500
+Subject: [PATCH 1/2] LayerManagerPlugin: First version of MX6 GAL/virtual framebuffer Plugin
+
+ - WindowSystems: implement support for virtual framebuffer window system
+ - GraphicSystems: implement support for MX6 2D GPU (GAL)
+ - TextureBinders: implement support for virtual frambuffer surfaces with GAL
+
+Upstream-Status: Pending
+---
+ CMakeLists.txt                                     |   24 +-
+ .../Renderers/Graphic/CMakeLists.txt               |   62 +++-
+ .../include/GraphicSystems/MXGALGraphicSystem.h    |   79 ++++
+ .../PlatformSurfaces/VFBMXGALPlatformSurface.h     |   41 ++
+ .../Graphic/include/TextureBinders/VFBMXGAL.h      |   50 +++
+ .../include/WindowSystems/VFBWindowSystem.h        |   77 ++++
+ .../src/GraphicSystems/MXGALGraphicSystem.cpp      |  437 ++++++++++++++++++++
+ .../Graphic/src/TextureBinders/VFBMXGAL.cpp        |  142 +++++++
+ .../Graphic/src/WindowSystems/VFBWindowSystem.cpp  |  321 ++++++++++++++
+ .../Platform/VFBMXGALRenderer/CMakeLists.txt       |   45 ++
+ .../VFBMXGALRenderer/include/VFBMXGALRenderer.h    |   52 +++
+ .../VFBMXGALRenderer/src/VFBMXGALRenderer.cpp      |  151 +++++++
+ cmake/modules/FindMXGAL.cmake                      |   40 ++
+ 13 files changed, 1516 insertions(+), 5 deletions(-)
+ create mode 100644 LayerManagerPlugins/Renderers/Graphic/include/GraphicSystems/MXGALGraphicSystem.h
+ create mode 100644 LayerManagerPlugins/Renderers/Graphic/include/PlatformSurfaces/VFBMXGALPlatformSurface.h
+ create mode 100644 LayerManagerPlugins/Renderers/Graphic/include/TextureBinders/VFBMXGAL.h
+ create mode 100644 LayerManagerPlugins/Renderers/Graphic/include/WindowSystems/VFBWindowSystem.h
+ create mode 100644 LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp
+ create mode 100644 LayerManagerPlugins/Renderers/Graphic/src/TextureBinders/VFBMXGAL.cpp
+ create mode 100644 LayerManagerPlugins/Renderers/Graphic/src/WindowSystems/VFBWindowSystem.cpp
+ create mode 100644 LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/CMakeLists.txt
+ create mode 100644 LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/include/VFBMXGALRenderer.h
+ create mode 100644 LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/src/VFBMXGALRenderer.cpp
+ create mode 100644 cmake/modules/FindMXGAL.cmake
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ac87d33..c05fd2b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,7 @@
+ # 
+ # Copyright 2010, 2011 BMW Car IT GmbH  
+ # Copyright (C) 2011 DENSO CORPORATION and Robert Bosch Car Multimedia Gmbh
++# Copyright (C) 2012 Freescale Semiconductor, Inc.
+ # 
+ # 
+ # Licensed under the Apache License, Version 2.0 (the "License"); 
+@@ -51,6 +52,8 @@ option (WITH_DLT            "Build with DLT support "
+ option (WITH_WAYLAND        "Build plugin of Wayland GBS"                         OFF)
+ option (WITH_WAYLAND_FBDEV  "Build Wayland with FBDEV backend"                    OFF)
+ option (WITH_WAYLAND_X11    "Build Wayland with X11 backend"                      OFF)
++option (WITH_VFB_MX         "Build for Virtual FB on Freescale MX"                ON )
++option (WITH_MXGAL_LIB     "Build development library for MX GAL Based Renderers" ON )
+ 
+ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+ 
+@@ -64,6 +67,10 @@ if (WITH_X11_GLES OR WITH_WAYLAND)
+     set (WITH_GLESv2_LIB ON CACHE STRING "" FORCE)
+ endif(WITH_X11_GLES OR WITH_WAYLAND)
+ 
++if (WITH_VFB_MX)
++    set (WITH_MXGAL_LIB ON CACHE STRING "" FORCE)
++endif(WITH_VFB_MX)
++
+ include_directories ("${PROJECT_SOURCE_DIR}/3rdParty/")
+ 
+ add_subdirectory (3rdParty)
+@@ -73,9 +80,9 @@ add_subdirectory (LayerManagerCommands)
+ add_subdirectory (LayerManagerService)
+ add_subdirectory (LayerManagerUtils)
+ 
+-if (WITH_GLESv2_LIB OR WITH_GLX_LIB)
++if (WITH_GLESv2_LIB OR WITH_GLX_LIB OR WITH_MXGAL_LIB)
+     add_subdirectory (LayerManagerPlugins/Renderers/Graphic)
+-endif(WITH_GLESv2_LIB OR WITH_GLX_LIB)
++endif(WITH_GLESv2_LIB OR WITH_GLX_LIB OR WITH_MXGAL_LIB)
+ 
+ if (WITH_DESKTOP)
+     add_subdirectory (LayerManagerPlugins/Renderers/Platform/GLXRenderer)
+@@ -95,9 +102,22 @@ if (WITH_X11_GLES)
+     add_subdirectory (LayerManagerPlugins/Renderers/Platform/X11GLESRenderer)
+ endif(WITH_X11_GLES)   
+ 
++if (WITH_VFB_MX)
++    add_subdirectory (LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer)
++endif(WITH_VFB_MX)   
++
+ if (WITH_EGL_EXAMPLE)
++if (WITH_VFB_MX)
++    add_subdirectory (LayerManagerExamples/EGLVFBApplicationExample)
++    add_subdirectory (LayerManagerExamples/EGLVFBMockNavigation)
++endif(WITH_VFB_MX)   
++endif(WITH_EGL_EXAMPLE)
++
++if (WITH_EGL_EXAMPLE)
++if (WITH_X11_GLES)
+     add_subdirectory (LayerManagerExamples/EGLX11ApplicationExample)
+     add_subdirectory (LayerManagerExamples/EGLX11MockNavigation)
++endif(WITH_X11_GLES)   
+ endif(WITH_EGL_EXAMPLE)
+ 
+ if (WITH_GLX_EXAMPLE)
+diff --git a/LayerManagerPlugins/Renderers/Graphic/CMakeLists.txt b/LayerManagerPlugins/Renderers/Graphic/CMakeLists.txt
+index 37c2e4e..5541c5f 100644
+--- a/LayerManagerPlugins/Renderers/Graphic/CMakeLists.txt
++++ b/LayerManagerPlugins/Renderers/Graphic/CMakeLists.txt
+@@ -2,6 +2,7 @@
+ # 
+ # Copyright 2010, 2011 BMW Car IT GmbH 
+ # Copyright (C) 2011 DENSO CORPORATION and Robert Bosch Car Multimedia Gmbh
++# Copyright (C) 2012 Freescale Semiconductors
+ # 
+ # 
+ # Licensed under the Apache License, Version 2.0 (the "License"); 
+@@ -72,6 +73,45 @@ file(GLOB GRAPHIC_TRANSFORM_INCLUDES
+ 
+ endif(WITH_GLESv2_LIB AND NOT WITH_WAYLAND) 
+ 
++if (WITH_MXGAL_LIB) 
++set(GRAPHIC_LIB_NAME LayerManagerGraphicMXGAL)
++file(GLOB SOURCES 
++        ../Base/src/BaseRenderer.cpp 
++        src/GraphicSystems/MXGALGraphicSystem.cpp
++        src/WindowSystems/VFBWindowSystem.cpp  
++        src/TextureBinders/VFBMXGAL.cpp
++        src/Transformation/ViewportTransform.cpp
++        )
++
++file(GLOB GRAPHIC_BASE_INCLUDES 
++    ../Base/include/*.h
++)
++
++file(GLOB GRAPHIC_GRAPHICSYSTEM_INCLUDES 
++    include/GraphicSystems/BaseGraphicSystem.h
++    include/GraphicSystems/MXGALGraphicSystem.h
++)
++
++file(GLOB GRAPHIC_TEXTUREBINDERS_INCLUDES 
++    include/TextureBinders/ITextureBinder.h
++    include/TextureBinders/VFBMXGAL.h
++)
++
++file(GLOB GRAPHIC_PLATFORM_INCLUDES 
++    include/PlatformSurfaces/VFBMXGALPlatformSurface.h
++)
++
++file(GLOB GRAPHIC_WINDOWSYSTEMS_INCLUDES 
++    include/WindowSystems/BaseWindowSystem.h
++    include/WindowSystems/VFBWindowSystem.h
++)
++
++file(GLOB GRAPHIC_TRANSFORM_INCLUDES 
++    include/Transformation/ViewportTransform.h
++)
++
++endif(WITH_MXGAL_LIB)
++
+ if (WITH_GLX_LIB) 
+ set(GRAPHIC_LIB_NAME LayerManagerGraphicGLX)
+ file(GLOB SOURCES 
+@@ -175,9 +215,18 @@ endif(WITH_WAYLAND)
+ 
+ add_library(${GRAPHIC_LIB_NAME} SHARED ${SOURCES})
+ 
+-if (NOT WITH_WAYLAND)
++if (WITH_GLESv2_LIB OR WITH_GLX_LIB)
+ find_package(X11 REQUIRED)
+ include_directories(${X11_INCLUDE_DIR})
++endif (WITH_GLESv2_LIB OR WITH_GLX_LIB)
++
++if (WITH_MXGAL_LIB)
++find_package(MXGAL REQUIRED)
++include_directories(${MXGAL_INCLUDE_DIR})
++set(GRAPHIC_NATIVE_LIBS ${MXGAL_LIBRARY}) 
++endif (WITH_MXGAL_LIB)
++
++if (NOT WITH_WAYLAND)
+ find_package (Threads)
+ endif (NOT WITH_WAYLAND)
+ 
+@@ -204,9 +253,16 @@ set(LIBS ${LIBS} ${WAYLAND_SERVER_LIBRARIES})
+ if (WITH_WAYLAND_X11)
+ set(LIBS ${LIBS} ${X11_X11_LIB})
+ endif (WITH_WAYLAND_X11)
+-else(WITH_WAYLAND)
++endif (WITH_WAYLAND)
++
++if (WITH_GLESv2_LIB OR WITH_GLX_LIB)
+ set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${X11_X11_LIB} ${X11_Xcomposite_LIB} ${X11_Xdamage_LIB} ${GRAPHIC_NATIVE_LIBS} LayerManagerUtils )
+-endif(WITH_WAYLAND)
++endif (WITH_GLESv2_LIB OR WITH_GLX_LIB)
++
++if (WITH_MXGAL_LIB)
++set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${GRAPHIC_NATIVE_LIBS} LayerManagerUtils )
++endif (WITH_MXGAL_LIB)
++
+ target_link_libraries(${GRAPHIC_LIB_NAME} ${LIBS})
+ 
+ 
+diff --git a/LayerManagerPlugins/Renderers/Graphic/include/GraphicSystems/MXGALGraphicSystem.h b/LayerManagerPlugins/Renderers/Graphic/include/GraphicSystems/MXGALGraphicSystem.h
+new file mode 100644
+index 0000000..503e664
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Graphic/include/GraphicSystems/MXGALGraphicSystem.h
+@@ -0,0 +1,79 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ * Copyright (C) 2012 Freescale Semiconductor, Inc.
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++
++#ifndef _MXGALGRAPHICSYSTEM_H_
++#define _MXGALGRAPHICSYSTEM_H_
++
++#include <HAL/gc_hal.h>
++#include <HAL/gc_hal_raster.h>
++#include <linux/fb.h>
++#include "GraphicSystems/BaseGraphicSystem.h"
++#include "Log.h"
++class MXGALGraphicsystem: public BaseGraphicSystem<int, int>
++{
++public:
++
++    MXGALGraphicsystem(int windowHeight, int windowWidth);
++    virtual ~MXGALGraphicsystem();
++
++    virtual bool init(int display, int window);
++
++    virtual void clearBackground();
++    
++    virtual void activateGraphicContext();
++    virtual void releaseGraphicContext();
++    
++    virtual void swapBuffers();
++
++    virtual void beginLayer(Layer* layer);
++    virtual void checkRenderLayer();
++    virtual void renderLayer();
++    virtual void endLayer();
++
++    virtual void saveScreenShotOfFramebuffer(std::string fileToSave);
++
++    virtual void renderSurface(Surface* surface);
++    gco2D getG2d();
++
++protected:
++    int m_windowWidth;
++    int m_windowHeight;
++    int m_nativeDisplay;
++    int m_nativeWindow;
++    Layer* m_currentLayer;
++private:
++    void saveScreenShot();
++    bool updateRenderTarget(gceSURF_ROTATION rotation);
++    gcoHAL m_hal;
++    gcoOS m_os;
++    gco2D m_g2d;
++    gceHARDWARE_TYPE m_currentHardwareType;
++    gceSURF_FORMAT m_targetFormat;
++    int m_fbFd;
++    struct fb_var_screeninfo m_fbVarInfo;
++    struct fb_fix_screeninfo m_fbFixInfo;
++};
++
++inline gco2D MXGALGraphicsystem::getG2d()
++{
++    return m_g2d;
++};
++
++#endif /* _MXGALGRAPHICSYSTEM_H_ */
+diff --git a/LayerManagerPlugins/Renderers/Graphic/include/PlatformSurfaces/VFBMXGALPlatformSurface.h b/LayerManagerPlugins/Renderers/Graphic/include/PlatformSurfaces/VFBMXGALPlatformSurface.h
+new file mode 100644
+index 0000000..f4b2abf
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Graphic/include/PlatformSurfaces/VFBMXGALPlatformSurface.h
+@@ -0,0 +1,41 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ * Copyright (C) 2012 Freescale Semiconductor, Inc.
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++
++#ifndef _VFBMXGALPLATFORMSURFACE_H_
++#define _VFBMXGALPLATFORMSURFACE_H_
++
++#include "PlatformSurface.h"
++#include "Surface.h"
++
++class VFBMXGALPlatformSurface: public PlatformSurface
++{
++public:
++    VFBMXGALPlatformSurface(Surface* surface)
++    : PlatformSurface(surface)
++    {
++    }
++
++    ~VFBMXGALPlatformSurface()
++    {
++    }
++    
++};
++
++#endif /* _VFBMXGALPLATFORMSURFACE_H_ */
+diff --git a/LayerManagerPlugins/Renderers/Graphic/include/TextureBinders/VFBMXGAL.h b/LayerManagerPlugins/Renderers/Graphic/include/TextureBinders/VFBMXGAL.h
+new file mode 100644
+index 0000000..572e8d8
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Graphic/include/TextureBinders/VFBMXGAL.h
+@@ -0,0 +1,50 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ * Copyright (C) 2012 Freescale Semiconductor, Inc.
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++
++#ifndef _VFBMXGAL_H_
++#define _VFBMXGAL_H_
++
++#include <HAL/gc_hal.h>
++#include "TextureBinders/ITextureBinder.h"
++#include "GraphicSystems/MXGALGraphicSystem.h"
++
++class VFBMXGAL: public ITextureBinder
++{
++public:
++    virtual PlatformSurface* createPlatformSurface(Surface* surface);
++
++    VFBMXGAL();
++    bool bindSurfaceTexture(Surface* surface);
++    bool unbindSurfaceTexture(Surface* surface);
++    void createClientBuffer(Surface* surface);
++    void destroyClientBuffer(Surface* surface);
++    void setGraphicSystem(MXGALGraphicsystem* pGraphicSystem);
++
++private:
++    MXGALGraphicsystem * m_pGraphicSystem;
++};
++
++inline void VFBMXGAL::setGraphicSystem(MXGALGraphicsystem* pGraphicSystem)
++{
++    m_pGraphicSystem = pGraphicSystem;
++};
++
++
++#endif /* _VFBMXGAL_H_ */
+diff --git a/LayerManagerPlugins/Renderers/Graphic/include/WindowSystems/VFBWindowSystem.h b/LayerManagerPlugins/Renderers/Graphic/include/WindowSystems/VFBWindowSystem.h
+new file mode 100644
+index 0000000..c2c66df
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Graphic/include/WindowSystems/VFBWindowSystem.h
+@@ -0,0 +1,77 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ * Copyright (C) 2012 Freescale Semiconductor, Inc.
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++
++#ifndef _VFBWINDOWSYSTEM_H_
++#define _VFBWINDOWSYSTEM_H_
++#include "WindowSystems/BaseWindowSystem.h"
++#include "GraphicSystems/BaseGraphicSystem.h"
++#include "Surface.h"
++#include "PlatformSurfaces/VFBMXGALPlatformSurface.h"
++#include "Log.h"
++#include "ScreenShotType.h"
++#include "config.h"
++
++
++class VFBWindowSystem: public BaseWindowSystem
++{
++public:
++    VFBWindowSystem(const char* displayname, int width, int height, Scene* pScene);
++    virtual ~VFBWindowSystem();
++    bool init(BaseGraphicSystem<int, int>* sys);
++    bool start();
++    void stop();
++    virtual void allocatePlatformSurface(Surface *surface);
++    void doScreenShot(std::string fileName);
++    void doScreenShotOfLayer(std::string fileName, const uint id);
++    void doScreenShotOfSurface(std::string fileName, const uint id, const uint layer_id);
++
++private:
++    void printDebug();
++    void Redraw();
++    void cleanup();
++    void Screenshot();
++    void* EventLoop();
++
++    ScreenShotType takeScreenshot;
++    std::string screenShotFile;
++    uint screenShotSurfaceID;
++    uint screenShotLayerID;
++    int windowWidth;
++    int windowHeight;
++    const char* displayname;
++    bool debugMode;
++    bool m_running;
++    bool m_initialized;
++    bool m_success;
++    pthread_mutex_t run_lock;
++
++
++protected:
++
++    virtual void CheckRedrawAllLayers();
++    virtual void RedrawAllLayers();
++
++    pthread_t renderThread;
++    BaseGraphicSystem<int, int>* graphicSystem;    
++
++    friend void * VFBeventLoopCallback(void *); 
++};
++
++#endif /* _VFBWINDOWSYSTEM_H_ */
+diff --git a/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp b/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp
+new file mode 100644
+index 0000000..b05fdb0
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Graphic/src/GraphicSystems/MXGALGraphicSystem.cpp
+@@ -0,0 +1,437 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ * Copyright (C) 2012 Freescale Semiconductor, Inc.
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++
++#include <sys/stat.h> 
++#include <fcntl.h>
++#include <stropts.h>
++
++#include "GraphicSystems/MXGALGraphicSystem.h"
++#include "IlmMatrix.h"
++#include "string.h"
++#include "Bitmap.h"
++#include "Transformation/ViewportTransform.h"
++
++
++MXGALGraphicsystem::MXGALGraphicsystem(int windowWidth, int windowHeight)
++: m_windowWidth(windowWidth)
++, m_windowHeight(windowHeight)
++{
++    LOG_DEBUG("MXGALGraphicsystem", "creating MXGALGraphicsystem");
++}
++
++MXGALGraphicsystem::~MXGALGraphicsystem()
++{
++    gcoHAL_Destroy(m_hal);
++    gcoOS_Destroy(m_os);
++    close(m_fbFd);
++
++}
++
++bool MXGALGraphicsystem::updateRenderTarget(gceSURF_ROTATION rotation)
++{
++    bool retVal = true;
++    gceSTATUS status;
++    unsigned int renderAddress;
++
++    renderAddress = m_fbFixInfo.smem_start + (m_fbVarInfo.yoffset * m_fbFixInfo.line_length);
++    status =  gco2D_SetTargetEx( m_g2d, renderAddress, m_fbFixInfo.line_length, rotation, m_fbVarInfo.xres, m_fbVarInfo.yres);
++    if (status < 0)
++    {
++        LOG_ERROR("MXGALGraphicsystem", "Failed to setup render target  status:" <<  status);
++        retVal  = false;
++    }
++    return retVal; 
++}
++
++void MXGALGraphicsystem::activateGraphicContext()
++{
++    gceSTATUS status;
++    LOG_DEBUG("MXGALGraphicsystem", "Activating graphic context ");
++
++    do {
++        status = gcoHAL_GetHardwareType(gcvNULL, &m_currentHardwareType);
++        if (status < 0)
++        {
++            LOG_ERROR("MXGALGraphicsystem", "Failed to get hardware type status:" <<  status);
++            break;
++        }
++
++        status = gcoHAL_SetHardwareType(gcvNULL, gcvHARDWARE_2D);
++        if (status < 0)
++        {
++            gcoHAL_SetHardwareType(gcvNULL, m_currentHardwareType);
++            LOG_ERROR("MXGALGraphicsystem", "Failed to set hardware type status:" <<  status);
++            break;
++        }
++
++    }while (0);
++
++}
++
++void MXGALGraphicsystem::releaseGraphicContext() 
++{
++    gceSTATUS status;
++    LOG_DEBUG("MXGALGraphicsystem", "Releasing graphic context ");
++
++    status = gcoHAL_SetHardwareType(gcvNULL, m_currentHardwareType);
++    if (status < 0)
++    {
++        LOG_ERROR("MXGALGraphicsystem", "Failed to reset hardware type status:" <<  status);
++    }
++
++}   
++
++bool MXGALGraphicsystem::init(int display, int NativeWindow)
++{        
++    bool retVal = true;
++    gceSTATUS status;
++    (void) display; //avoid warning
++
++    do {
++        /* Construct the gcoOS object. */
++        LOG_DEBUG("MXGALGraphicsystem", "Construct gcoOS object");
++        status = gcoOS_Construct(gcvNULL, &m_os);
++        if (status < 0)
++        {
++            LOG_ERROR("MXGALGraphicsystem", "Failed to construct OS object (status = " << status << ")");
++            retVal = false;
++            break;
++        }
++
++        /* Construct the gcoHAL object. */
++        LOG_DEBUG("MXGALGraphicsystem", "Construct gcoHAL object");
++        status = gcoHAL_Construct(gcvNULL, m_os, &m_hal);
++        if (status < 0)
++        {
++            LOG_ERROR("MXGALGraphicsystem", "Failed to construct GAL object (status = " << status << ")");
++            retVal = false;
++            break;
++        }
++
++        LOG_DEBUG("MXGALGraphicsystem", "Get 2DEngine handle");
++        status = gcoHAL_Get2DEngine(m_hal, &m_g2d);
++        if (status < 0)
++        {
++            LOG_ERROR("MXGALGraphicsystem", "Failed to get 2D engine object (status = " << status << ")");
++            retVal = false;
++            break;
++        }
++
++        char fbName[256];
++        sprintf(fbName, "/dev/fb%d", NativeWindow);
++        LOG_DEBUG("MXGALGraphicsystem", "Native window is " << fbName);
++        m_fbFd = open(fbName, O_RDWR);
++        if(m_fbFd < 0)
++        {
++            LOG_ERROR("MXGALGraphicsystem", "Failed to open window (status =" << m_fbFd << ")");
++            retVal = false;
++            break;
++        }
++
++        if(ioctl(m_fbFd, FBIOGET_FSCREENINFO, &m_fbFixInfo) < 0)
++        {
++            LOG_ERROR("MXGALGraphicsystem", "Failed to get fixed window info");
++            retVal = false;
++            break;
++        }
++
++        if(ioctl(m_fbFd, FBIOGET_VSCREENINFO, &m_fbVarInfo) < 0)
++        {
++            LOG_ERROR("MXGALGraphicsystem", "Failed to get variable window info");
++            retVal = false;
++            break;
++        }
++
++        //Setup first render location
++        m_fbVarInfo.yoffset += m_fbVarInfo.yres;
++        if ((m_fbVarInfo.yoffset + m_fbVarInfo.yres) > m_fbVarInfo.yres_virtual )
++            m_fbVarInfo.yoffset = 0;
++
++        m_windowWidth = m_fbVarInfo.xres;
++        m_windowHeight = m_fbVarInfo.yres;
++
++        //Set target format to match framebuffer
++        switch (m_fbVarInfo.bits_per_pixel){
++        case 16: 
++            m_targetFormat = gcvSURF_R5G6B5;
++            break;
++        case 32: 
++            m_targetFormat = gcvSURF_A8B8G8R8;
++            break;
++        default:
++            m_targetFormat = gcvSURF_R5G6B5;
++            break;
++        }
++    } while(0);
++
++
++
++    return retVal;
++}
++
++void MXGALGraphicsystem::clearBackground()
++{
++    gceSTATUS status;
++    gcsRECT targetRect = {0,0,m_windowWidth, m_windowHeight};
++
++    if (!updateRenderTarget(gcvSURF_0_DEGREE))
++            LOG_ERROR("MXGALGraphicsystem", "Failed to set render Target: " << status);
++
++    status = gco2D_SetClipping(m_g2d, &targetRect);
++    if(status < 0)
++        LOG_ERROR("MXGALGraphicsystem", "Failed to set target rectangle: " << status);
++
++    status = gco2D_SetTransparencyAdvanced(m_g2d, gcv2D_OPAQUE, gcv2D_OPAQUE, gcv2D_OPAQUE);
++    if(status < 0)
++        LOG_ERROR("MXGALGraphicsystem", "Failed to set transparency: " << status);
++
++    //TODO: Should there be a default clear color?
++    status = gco2D_Clear(
++            m_g2d,
++            1,
++            &targetRect,
++            0xFF000000,
++            0xCC,
++            0xCC,
++            m_targetFormat 
++            );
++    if(status < 0)
++        LOG_ERROR("MXGALGraphicsystem", "GAL clear failed: " << status);
++
++    gco2D_Flush(m_g2d);
++    gcoHAL_Commit(m_hal, gcvFALSE);
++}
++
++void MXGALGraphicsystem::swapBuffers()
++{
++    gcoHAL_Commit(m_hal, gcvTRUE);
++    if(ioctl(m_fbFd, FBIOPAN_DISPLAY, &m_fbVarInfo) < 0) 
++    {
++        LOG_ERROR("MXGALGraphicsystem", "Failed to swap");
++    }
++    else
++    {
++        m_fbVarInfo.yoffset += m_fbVarInfo.yres;
++        if ((m_fbVarInfo.yoffset + m_fbVarInfo.yres) > m_fbVarInfo.yres_virtual )
++            m_fbVarInfo.yoffset = 0;
++    }
++}
++
++void MXGALGraphicsystem::beginLayer(Layer* currentLayer)
++{
++    //LOG_DEBUG("MXGALGraphicsystem", "Beginning to draw layer: " << currentLayer->getID());
++    m_currentLayer = currentLayer;
++    // TODO layer destination / source
++}
++
++void MXGALGraphicsystem::checkRenderLayer()
++{
++    SurfaceList surfaces = m_currentLayer->getAllSurfaces();
++
++    m_currentLayer->damaged = false;
++
++    if (!m_baseWindowSystem->m_damaged)
++    {
++        if (m_currentLayer->renderPropertyChanged)
++        {
++            m_currentLayer->damaged = true;
++        }
++        else if ((m_currentLayer)->visibility && (m_currentLayer)->opacity > 0.0)
++        {
++            for(std::list<Surface*>::const_iterator currentS = surfaces.begin(); currentS != surfaces.end(); currentS++)
++            {
++                if ((*currentS)->renderPropertyChanged)
++                {
++                    m_currentLayer->damaged = true;
++                    break;
++                }
++                else if ((*currentS)->hasNativeContent() && (*currentS)->damaged && (*currentS)->visibility && (*currentS)->opacity>0.0f)
++                {
++                    m_currentLayer->damaged = true;
++                    break;
++                }
++            }
++        }
++    }
++
++    for(std::list<Surface*>::const_iterator currentS = surfaces.begin(); currentS != surfaces.end(); currentS++)
++    {
++        (*currentS)->damaged = false;
++        (*currentS)->renderPropertyChanged = false;
++    }
++
++    m_currentLayer->renderPropertyChanged = false;
++
++    if (m_currentLayer->damaged)
++    {
++        m_baseWindowSystem->m_damaged = true;
++    }
++}
++
++void MXGALGraphicsystem::renderLayer()
++{
++    if ( (m_currentLayer)->visibility && (m_currentLayer)->opacity > 0.0 ) 
++    {
++        SurfaceList surfaces = m_currentLayer->getAllSurfaces();
++        for(std::list<Surface*>::const_iterator currentS = surfaces.begin(); currentS != surfaces.end(); currentS++)
++        {
++            if ((*currentS)->hasNativeContent() && (*currentS)->visibility && (*currentS)->opacity>0.0f)
++            {
++                Surface* currentSurface = (Surface*)*currentS;
++                renderSurface(currentSurface);
++            }
++        }
++    }
++}
++
++void MXGALGraphicsystem::endLayer()
++{
++    //LOG_DEBUG("MXGALGraphicsystem", "Done with rendering layer: " << m_currentLayer->getID());
++    m_currentLayer = NULL;
++}
++
++
++void MXGALGraphicsystem::renderSurface(Surface* surface)
++{
++//  LOG_DEBUG("MXGALGraphicsystem", "renderSurface " << surface->getID());
++
++    // check if surface is cropped completely, if so then skip rendering
++    if (ViewportTransform::isFullyCropped(surface->getDestinationRegion(), m_currentLayer->getSourceRegion() ) )
++        return; // skip rendering of this surface, because it is cropped by layer source region
++
++    gceSTATUS status;
++
++    gceSURF_ROTATION srcRot, destRot;
++
++    const Rectangle& layerDestinationRegion = (m_currentLayer)->getDestinationRegion();
++    const Rectangle& layerSourceRegion = (m_currentLayer)->getSourceRegion();
++
++    // these variables contain the current calculated values of the surface
++    Rectangle targetSurfaceSource = surface->getSourceRegion();
++    Rectangle targetSurfaceDestination = surface->getDestinationRegion();
++
++    ViewportTransform::applyLayerSource(layerSourceRegion, targetSurfaceSource, targetSurfaceDestination);
++    ViewportTransform::applyLayerDestination(layerDestinationRegion, layerSourceRegion, targetSurfaceDestination);
++
++    //Set rotation
++    
++    int finalOrientation =  (m_currentLayer->getOrientation() + (surface)->getOrientation()) % 4;
++  
++    srcRot = destRot = gcvSURF_0_DEGREE;    
++    switch (finalOrientation){
++    case 0:
++        destRot = gcvSURF_0_DEGREE;    
++        break;
++    case 1:
++        destRot = gcvSURF_90_DEGREE;    
++        break;
++    case 2:
++        destRot = gcvSURF_180_DEGREE;    
++        break;
++    case 3:
++        destRot = gcvSURF_270_DEGREE;    
++        break;
++    default:
++        break;
++        //impossible
++    }
++
++    updateRenderTarget(destRot);
++    if (false == m_binder->bindSurfaceTexture(surface)) 
++    {   
++        LOG_ERROR("MXGALGraphicsystem", "renderSurface not successfully bound " << surface->getID());
++        return;
++    } else {
++        LOG_DEBUG("MXGALGraphicsystem", "renderSurface bound " << surface->getID());
++    }
++
++    //Draw the layer
++    gcsRECT srcRect = {targetSurfaceSource.x, targetSurfaceSource.y, targetSurfaceSource.width, targetSurfaceSource.height};
++    gcsRECT destRect = {targetSurfaceDestination.x, targetSurfaceDestination.y, targetSurfaceDestination.width, targetSurfaceDestination.height};
++    gco2D_SetStretchRectFactors(m_g2d, &srcRect, &destRect);
++
++    status = gco2D_SetSource( m_g2d, &srcRect);
++    if (status < 0)
++    {
++        LOG_ERROR("MXGALGraphicsystem", "Failed to set source rectangle  status:" <<  status);
++    }
++
++    status = gco2D_SetClipping( m_g2d, &destRect);
++    if (status < 0)
++    {
++        LOG_ERROR("MXGALGraphicsystem", "Failed to set destination rectangle  status:" <<  status);
++    }
++
++    status = gco2D_SetStretchRectFactors(m_g2d, &srcRect, &destRect);
++    if (status < 0)
++    {
++        LOG_ERROR("MXGALGraphicsystem", "Failed to set stretch factors  status:" <<  status);
++    }
++    double alpha = m_currentLayer->getOpacity() * (surface)->getOpacity();
++    status = gco2D_EnableAlphaBlend(m_g2d,
++            alpha*255, 0,
++            gcvSURF_PIXEL_ALPHA_STRAIGHT, gcvSURF_PIXEL_ALPHA_STRAIGHT,
++            gcvSURF_GLOBAL_ALPHA_SCALE, gcvSURF_GLOBAL_ALPHA_OFF,
++            gcvSURF_BLEND_ONE, gcvSURF_BLEND_INVERSED,
++            gcvSURF_COLOR_MULTIPLY, gcvSURF_COLOR_STRAIGHT);
++    if (status < 0)
++    {
++        LOG_ERROR("MXGALGraphicsystem", "Failed to set alpha  status:" <<  status);
++    }
++
++    gco2D_StretchBlit(m_g2d, 1, &destRect, 0xCC, 0xCC, m_targetFormat);
++    if (status < 0)
++    {
++        LOG_ERROR("MXGALGraphicsystem", "Failed to blit  status:" <<  status);
++    }
++    //Flush!!
++    gcoHAL_Commit(m_hal, gcvFALSE);
++
++    surface->frameCounter++;
++
++}
++
++void MXGALGraphicsystem::saveScreenShotOfFramebuffer(std::string fileToSave)
++{
++    //TODO Do actual implementation
++    LOG_DEBUG("MXGALGraphicSystem","taking screenshot and saving it to:" << fileToSave);
++
++    LOG_DEBUG("MXGALGraphicSystem","Screenshot: " << m_windowWidth << " * " << m_windowHeight);
++    char *buffer = (char *) malloc( m_windowWidth * m_windowHeight * 4 * sizeof(char));
++
++    // convert to RGB for bitmap
++    int pixelcount = m_windowHeight * m_windowWidth;
++    char *rgbbuffer = (char *) malloc(pixelcount * 3 * sizeof(char));
++    for (int row = 0; row < m_windowHeight; row++)
++    {
++        for (int col = 0; col < m_windowWidth; col++)
++        {
++            int offset = row * m_windowWidth + col;
++            rgbbuffer[offset * 3] = buffer[offset * 4 + 2];
++            rgbbuffer[offset * 3 + 1] = buffer[offset * 4 + 1];
++            rgbbuffer[offset * 3 + 2] = buffer[offset * 4];
++        }
++    }
++
++    writeBitmap(fileToSave, rgbbuffer, m_windowWidth, m_windowHeight);
++    free(buffer);
++    free(rgbbuffer);
++}
++
+diff --git a/LayerManagerPlugins/Renderers/Graphic/src/TextureBinders/VFBMXGAL.cpp b/LayerManagerPlugins/Renderers/Graphic/src/TextureBinders/VFBMXGAL.cpp
+new file mode 100644
+index 0000000..e7dda8c
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Graphic/src/TextureBinders/VFBMXGAL.cpp
+@@ -0,0 +1,142 @@
++/***************************************************************************
++*
++* Copyright 2010,2011 BMW Car IT GmbH
++* Copyright (C) 2012 Freescale Semiconductor, Inc.
++*
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*        http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*
++****************************************************************************/
++
++#include <linux/fb.h>
++#include <sys/stat.h> 
++#include <fcntl.h>
++#include <stropts.h>
++#include <HAL/gc_hal.h>
++#include <HAL/gc_hal_raster.h>
++#include "TextureBinders/VFBMXGAL.h"
++#include "PlatformSurfaces/VFBMXGALPlatformSurface.h"
++#include "Log.h"
++
++VFBMXGAL::VFBMXGAL()
++{
++}
++
++bool VFBMXGAL::bindSurfaceTexture(Surface* surface)
++{
++    bool retVal = true;
++    gceSTATUS status;
++    static struct fb_var_screeninfo fbVarInfo;
++    static struct fb_fix_screeninfo fbFixInfo;
++    int fd;
++
++    if (surface->hasNativeContent())
++    {
++        do{
++            char fbName[256];
++            sprintf(fbName, "/dev/fb%ld", surface->getNativeContent());
++            LOG_DEBUG("VFBMXGAL", "Surface to be bound is " << fbName);
++            fd = open(fbName, O_RDWR);
++            if(fd < 0)
++            {
++                LOG_ERROR("VFBMXGAL", "Failed to open window (status =" << fd << ")");
++                retVal = false;
++                break;
++            }
++
++            if(ioctl(fd, FBIOGET_FSCREENINFO, &fbFixInfo) < 0)
++            {
++                LOG_ERROR("VFBMXGAL", "Failed to get fixed window info");
++                retVal = false;
++                break;
++            }
++
++            if(ioctl(fd, FBIOGET_VSCREENINFO, &fbVarInfo) < 0)
++            {
++                LOG_ERROR("VFBMXGAL", "Failed to get variable window info");
++                retVal = false;
++                break;
++            }
++
++            gceSURF_FORMAT format;
++            switch(surface->getPixelFormat()){
++                case PIXELFORMAT_RGBA8888:
++                    format = gcvSURF_A8B8G8R8;
++                    break;
++                case PIXELFORMAT_RGB565:
++                    format = gcvSURF_R5G6B5;
++                    break;
++                case PIXELFORMAT_RGBA5551:
++                    format = gcvSURF_R5G5B5A1;
++                    break;
++                case PIXELFORMAT_RGBA4444:
++                    format = gcvSURF_R4G4B4A4;
++                    break;
++                case PIXELFORMAT_RGB888: //Not supported should this be RGBX8888 ?
++                case PIXELFORMAT_R8: //Not supported A8 is though
++                case PIXELFORMAT_RGBA6661: //Not supported
++                case PIXELFORMAT_UNKNOWN:
++                default:
++                    retVal = false;
++                    break;
++
++            }
++            if (retVal == false)
++            {
++                LOG_ERROR("VFBMXGAL", "Unsupported source color format");
++                break;
++            }
++
++
++           status = gco2D_SetColorSource( m_pGraphicSystem->getG2d(), fbFixInfo.smem_start + (fbVarInfo.yoffset*fbFixInfo.line_length),
++                    fbFixInfo.line_length, format, gcvSURF_0_DEGREE, fbVarInfo.xres, false, gcvSURF_OPAQUE,
++                    0 );
++            if(status != gcvSTATUS_OK)
++            {
++                LOG_ERROR("VFBMXGAL", "Failed to set source surface :" << status);
++                retVal = false;
++                break;
++            }
++        
++        } while(0);
++
++        
++    }
++
++    close (fd);
++    return retVal;
++}
++
++bool VFBMXGAL::unbindSurfaceTexture(Surface* surface)
++{
++    (void)surface; // TODO: remove, only prevents warning
++
++
++    return true;
++}
++
++void VFBMXGAL::createClientBuffer(Surface* surface)
++{
++// TODO: empty should remove
++}
++
++PlatformSurface* VFBMXGAL::createPlatformSurface(Surface* surface)
++{
++    return new VFBMXGALPlatformSurface(surface);
++}
++
++void VFBMXGAL::destroyClientBuffer(Surface* surface)
++{
++    VFBMXGALPlatformSurface* nativeSurface = (VFBMXGALPlatformSurface*)surface->platform;
++    
++}
+diff --git a/LayerManagerPlugins/Renderers/Graphic/src/WindowSystems/VFBWindowSystem.cpp b/LayerManagerPlugins/Renderers/Graphic/src/WindowSystems/VFBWindowSystem.cpp
+new file mode 100644
+index 0000000..3ec13cc
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Graphic/src/WindowSystems/VFBWindowSystem.cpp
+@@ -0,0 +1,321 @@
++/***************************************************************************
++*
++* Copyright 2010,2011 BMW Car IT GmbH
++* Copyright (C) 2012 Freescale Semiconductor, Inc.
++*
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*        http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*
++****************************************************************************/
++
++#include "WindowSystems/VFBWindowSystem.h"
++#include "Log.h"
++#include "Layer.h"
++#include <time.h>
++#include <sys/time.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <iomanip>
++
++VFBWindowSystem::VFBWindowSystem(const char* displayname, int width, int height, Scene* pScene)
++: BaseWindowSystem(pScene)
++{
++    LOG_DEBUG("VFBWindowSystem", "creating VFBWindowSystem");
++    (void)displayname; //avoid warning
++    takeScreenshot = (ScreenShotNone);
++    debugMode = (false);
++    m_initialized = (false);
++    m_success = (false);
++    windowWidth = (width);
++    windowHeight = (height);
++
++    // init and take mutex, so windowsystem only does init phase until mutex is released again
++    pthread_mutex_init(&run_lock, NULL);
++    pthread_mutex_lock(&run_lock);
++}
++
++VFBWindowSystem::~VFBWindowSystem()
++{
++}
++
++void VFBWindowSystem::printDebug(){
++    // print stuff about layerlist
++    std::stringstream debugmessage;
++    debugmessage << "Layer:  ID |   X  |   Y  |   W  |   H  | Al. \n";
++
++    LayerList list = m_pScene->getCurrentRenderOrder();
++
++    // loop the layers
++    LayerListConstIterator iter = list.begin();
++    LayerListConstIterator iterEnd = list.end();
++
++    for(; iter != iterEnd; ++iter)
++    {
++        Rectangle dest = (*iter)->getDestinationRegion();
++        debugmessage << "            " << std::setw(4) << (*iter)->getID() << " " << std::setw(3) << dest.x << " " << std::setw(3) << dest.y << " " << std::setw(3) << dest.width << " " << std::setw(3) << dest.height << " " << std::setw(3) << (*iter)->opacity << "\n";
++
++        debugmessage << "    Surface:  ID |Al.|  SVP: X |  Y |  W |  H     DVP:  X |  Y |  W |  H \n";
++
++        // loop the surfaces of within each layer
++        SurfaceList surfaceList = (*iter)->getAllSurfaces();
++        SurfaceListIterator surfaceIter = surfaceList.begin();
++        SurfaceListIterator surfaceIterEnd = surfaceList.end();
++
++        for(; surfaceIter != surfaceIterEnd ; ++surfaceIter)
++        {
++            Rectangle src = (*surfaceIter)->getSourceRegion();
++            Rectangle dest = (*surfaceIter)->getDestinationRegion();
++            debugmessage << "                        " << std::setw(4) << (*surfaceIter)->getID() << " " << std::setprecision(3) << (*surfaceIter)->opacity<< " " << std::setw(3) << src.x << " " << std::setw(3) << src.y << " " << std::setw(3) << src.width << " " << std::setw(3) << src.height << " " << std::setw(3) << dest.x << " " << std::setw(3) << dest.y << " " << std::setw(3) << dest.width << " " << std::setw(3) << dest.height  << "\n";
++        }
++    }
++    LOG_DEBUG("VFBWindowSystem",debugmessage.str());
++}
++
++
++static float timeSinceLastCalc = 0.0;
++static float FPS = 0.0;
++static struct timeval tv;
++static struct timeval tv0;
++static int Frame = 0;
++
++void CalculateFPS()
++{
++    // we have rendered a frame
++    Frame ++;
++
++    // every 3 seconds, calculate & print fps
++    gettimeofday(&tv, NULL);
++    timeSinceLastCalc = (float)(tv.tv_sec-tv0.tv_sec) + 0.000001*((float)(tv.tv_usec-tv0.tv_usec));
++
++    if (timeSinceLastCalc > 3.0f)
++    {
++        FPS = ((float)(Frame)) / timeSinceLastCalc;
++        char floatStringBuffer[256];
++        sprintf(floatStringBuffer, "FPS: %f", FPS);
++        LOG_INFO("VFBWindowSystem", floatStringBuffer);
++        tv0 = tv;
++        Frame = 0;
++    }
++}
++
++void VFBWindowSystem::CheckRedrawAllLayers()
++{
++    std::list<Layer*> layers = m_pScene->getCurrentRenderOrder();
++    for(std::list<Layer*>::const_iterator current = layers.begin(); current != layers.end(); current++)
++    {
++        Layer* currentLayer = (Layer*)*current;
++        graphicSystem->beginLayer(currentLayer);
++        graphicSystem->checkRenderLayer();
++        graphicSystem->endLayer();
++    }
++}
++
++void VFBWindowSystem::RedrawAllLayers()
++{
++    std::list<Layer*> layers = m_pScene->getCurrentRenderOrder();
++    for(std::list<Layer*>::const_iterator current = layers.begin(); current != layers.end(); current++)
++    {
++        graphicSystem->beginLayer(*current);
++        graphicSystem->renderLayer();
++        graphicSystem->endLayer();
++    }
++}
++
++void VFBWindowSystem::Redraw()
++{
++    // draw all the layers
++    m_pScene->lockScene();
++
++    CheckRedrawAllLayers();
++    if (1 || m_damaged)
++    {   
++        graphicSystem->activateGraphicContext();
++        graphicSystem->clearBackground();
++        RedrawAllLayers();
++        m_pScene->unlockScene();       
++        graphicSystem->swapBuffers();
++        graphicSystem->releaseGraphicContext();
++        if (debugMode)
++        {
++            printDebug();
++        }
++
++        CalculateFPS();
++
++        /* Reset the damage flag, all is up to date */
++        m_damaged = false;
++    }
++    else
++    {
++        m_pScene->unlockScene();
++    }
++}
++
++void VFBWindowSystem::Screenshot()
++{
++    m_pScene->lockScene();
++    graphicSystem->clearBackground();
++    graphicSystem->activateGraphicContext();
++    if (takeScreenshot==ScreenshotOfDisplay){
++    LOG_DEBUG("VFBWindowSystem", "Taking screenshot");
++        RedrawAllLayers();
++    }else if(takeScreenshot==ScreenshotOfLayer){
++        LOG_DEBUG("VFBWindowSystem", "Taking screenshot of layer");
++        Layer* currentLayer = m_pScene->getLayer(screenShotLayerID);
++        if (currentLayer!=NULL){
++            graphicSystem->beginLayer(currentLayer);
++            graphicSystem->renderLayer();
++            graphicSystem->endLayer();
++        }
++    }else if(takeScreenshot==ScreenshotOfSurface){
++        LOG_DEBUG("VFBWindowSystem", "Taking screenshot of surface");
++        Layer* currentLayer = m_pScene->getLayer(screenShotLayerID);
++        Surface* currentSurface = m_pScene->getSurface(screenShotSurfaceID);
++        if (currentLayer!=NULL && currentSurface!=NULL){
++            graphicSystem->beginLayer(currentLayer);
++            graphicSystem->renderSurface(currentSurface);
++            graphicSystem->endLayer();
++        }
++    }
++
++    graphicSystem->saveScreenShotOfFramebuffer(screenShotFile);
++    takeScreenshot = ScreenShotNone;
++    LOG_DEBUG("VFBWindowSystem", "Done taking screenshot");
++    graphicSystem->releaseGraphicContext();
++    m_pScene->unlockScene();
++}
++
++
++void VFBWindowSystem::cleanup(){
++    LOG_DEBUG("VFBWindowSystem", "Cleanup");
++    m_running = false;
++}
++
++/**
++ * Thread in charge of the CompositorWindow eventloop
++ * Friend function of class VFBWindowSystem
++ */
++void * VFBeventLoopCallback(void *ptr)
++{
++    VFBWindowSystem *windowsys = static_cast<VFBWindowSystem*>( (VFBWindowSystem*) ptr);
++    return windowsys->EventLoop();
++}
++
++void* VFBWindowSystem::EventLoop()
++{
++    LOG_DEBUG("VFBWindowSystem", "Enter thread");
++
++    // init own stuff
++    m_success = false;
++
++    // then init graphiclib
++    //TODO PHPH: Change to default display
++    int display = 0;
++    int window = 0;
++    m_success = this->graphicSystem->init(display,window);
++
++    m_initialized = true;
++    // start
++    // Done with init, wait for lock to actually run (ie start/stop method called)
++    pthread_mutex_lock(&this->run_lock);
++
++    Layer* defaultLayer;
++
++    gettimeofday(&tv0, NULL);
++
++    if (this->debugMode)
++    {
++        defaultLayer = this->m_pScene->createLayer(0);
++        defaultLayer->setOpacity(1.0);
++        defaultLayer->setDestinationRegion(Rectangle(0,0,this->windowWidth,this->windowHeight));
++        defaultLayer->setSourceRegion(Rectangle(0,0,this->windowWidth,this->windowHeight));
++        this->m_pScene->getCurrentRenderOrder().push_back(defaultLayer);
++    }
++
++    LOG_DEBUG("VFBWindowSystem", "Enter render loop");
++    while (this->m_running)
++    {
++        this->Redraw();
++    }
++    LOG_INFO("VFBWindowSystem", "Renderer thread finished");
++    return NULL;
++}
++
++bool VFBWindowSystem::init(BaseGraphicSystem<int,int>* base)
++{
++    VFBWindowSystem * renderer = this;
++    graphicSystem = base;
++    int status = pthread_create( &renderThread, NULL, VFBeventLoopCallback, (void *) renderer);
++    if (0 != status )
++    {
++        return false;
++    }
++
++    while (!m_initialized)
++    {
++        usleep(10000); // TODO
++        LOG_DEBUG("VFBWindowSystem","Waiting start complete " << m_initialized);
++    }
++    LOG_INFO("VFBWindowSystem","Start complete " << m_initialized << " success " << m_success);
++    return m_success;
++}
++
++bool VFBWindowSystem::start()
++{
++    bool result = true;
++    LOG_DEBUG("VFBWindowSystem", "Starting / Creating thread");
++    // let thread actually run
++    this->m_running = true;
++    pthread_mutex_unlock(&run_lock);
++    return result;
++}
++
++void VFBWindowSystem::stop()
++{
++    LOG_INFO("VFBWindowSystem","Stopping..");
++    this->m_running = false;
++    // needed if start was never called, we wake up thread, so it can immediatly finish
++    pthread_mutex_unlock(&run_lock);
++    pthread_join(renderThread,NULL);
++}
++
++void VFBWindowSystem::allocatePlatformSurface(Surface* surface)
++{
++    LOG_DEBUG("VFBWindowSystem","allocatePlatformSurface begin");
++    (void)surface; //avoid warning
++    LOG_DEBUG("VFBWindowSystem","allocatePlatformSurface end");
++}
++
++void VFBWindowSystem::doScreenShot(std::string fileName)
++{
++    takeScreenshot = ScreenshotOfDisplay;
++    screenShotFile = fileName;
++}
++
++void VFBWindowSystem::doScreenShotOfLayer(std::string fileName, const uint id)
++{
++    takeScreenshot = ScreenshotOfLayer;
++    screenShotFile = fileName;
++    screenShotLayerID = id;
++}
++
++void VFBWindowSystem::doScreenShotOfSurface(std::string fileName, const uint id, const uint layer_id)
++{
++    takeScreenshot = ScreenshotOfSurface;
++    screenShotFile = fileName;
++    screenShotSurfaceID = id;
++    screenShotLayerID = layer_id;
++}
++
+diff --git a/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/CMakeLists.txt b/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/CMakeLists.txt
+new file mode 100644
+index 0000000..bb180bc
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/CMakeLists.txt
+@@ -0,0 +1,45 @@
++############################################################################
++# 
++# Copyright 2010, 2011 BMW Car IT GmbH 
++# 
++# 
++# Licensed under the Apache License, Version 2.0 (the "License"); 
++# you may not use this file except in compliance with the License. 
++# You may obtain a copy of the License at 
++#
++#		http://www.apache.org/licenses/LICENSE-2.0 
++#
++# Unless required by applicable law or agreed to in writing, software 
++# distributed under the License is distributed on an "AS IS" BASIS, 
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
++# See the License for the specific language governing permissions and 
++# limitations under the License.
++#
++############################################################################
++
++cmake_minimum_required (VERSION 2.6)
++
++include_directories ("include")
++include_directories ("../../Base/include")
++include_directories ("../../Graphic/include")
++
++include_directories ("${PROJECT_SOURCE_DIR}/LayerManagerService/include")
++link_directories ("${PROJECT_SOURCE_DIR}/LayerManagerService/bin")
++include_directories ("${PROJECT_SOURCE_DIR}/LayerManagerUtils/include")
++link_directories ("${PROJECT_SOURCE_DIR}/LayerManagerUtils/bin")
++
++file(GLOB SOURCES 
++		src/VFBMXGALRenderer.cpp
++		)
++		
++add_library(VFBMXGALRenderer SHARED ${SOURCES})
++
++find_package (Threads)
++set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT} LayerManagerGraphicMXGAL LayerManagerUtils )
++target_link_libraries(VFBMXGALRenderer ${LIBS})
++
++add_dependencies(VFBMXGALRenderer LayerManagerService)
++add_dependencies(VFBMXGALRenderer LayerManagerUtils)
++add_dependencies(VFBMXGALRenderer LayerManagerGraphicMXGAL)
++
++install (TARGETS VFBMXGALRenderer DESTINATION lib/layermanager/renderer)
+diff --git a/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/include/VFBMXGALRenderer.h b/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/include/VFBMXGALRenderer.h
+new file mode 100644
+index 0000000..099283a
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/include/VFBMXGALRenderer.h
+@@ -0,0 +1,52 @@
++/***************************************************************************
++*
++* Copyright 2010 BMW Car IT GmbH
++* Copyright (C) 2012 Freescale Semiconductor, Inc.
++*
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*        http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*
++****************************************************************************/
++
++#ifndef _VFBMXGALRENDERER_H_
++#define _VFBMXGALRENDERER_H_
++
++#include "BaseRenderer.h"
++#include "LayerList.h"
++#include "GraphicSystems/MXGALGraphicSystem.h"
++#include "WindowSystems/VFBWindowSystem.h"
++
++class VFBMXGALRenderer : public BaseRenderer
++{
++public:
++    VFBMXGALRenderer(Scene* pScene);
++    bool start(int, int, const char*);
++    void stop();
++    void doScreenShot(std::string fileToSave);
++    void doScreenShotOfLayer(std::string fileToSave, uint id);
++    void doScreenShotOfSurface(std::string fileToSave, uint id, uint layer_id);
++    uint getNumberOfHardwareLayers(uint screenID);
++    uint* getScreenResolution(uint screenID);
++    uint* getScreenIDs(uint* length);
++    void signalWindowSystemRedraw();
++    Shader* createShader(const string* vertexName, const string* fragmentName);
++    void forceCompositionWindowSystem();
++
++private:
++    VFBWindowSystem* m_pWindowSystem;
++    MXGALGraphicsystem* m_pGraphicSystem;
++    uint m_width;
++    uint m_height;
++};
++
++#endif /* _VFBMXGALRENDERER_H_*/
+diff --git a/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/src/VFBMXGALRenderer.cpp b/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/src/VFBMXGALRenderer.cpp
+new file mode 100644
+index 0000000..f35f0d8
+--- /dev/null
++++ b/LayerManagerPlugins/Renderers/Platform/VFBMXGALRenderer/src/VFBMXGALRenderer.cpp
+@@ -0,0 +1,151 @@
++/***************************************************************************
++*
++* Copyright 2010 BMW Car IT GmbH
++* Copyright (C) 2012 Freescale Semiconductor, Inc.
++*
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*        http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*
++****************************************************************************/
++
++#include "VFBMXGALRenderer.h"
++#include "config.h"
++#include "TextureBinders/VFBMXGAL.h"
++
++VFBMXGALRenderer::VFBMXGALRenderer(Scene* pScene)
++: BaseRenderer(pScene)
++, m_pWindowSystem(0)
++, m_pGraphicSystem(0)
++, m_width(0)
++, m_height(0)
++{
++    LOG_DEBUG("VFBMXGALRenderer", "Creating Renderer");
++}
++
++bool VFBMXGALRenderer::start(int width, int height, const char* displayname)
++{
++    ITextureBinder* binder = NULL;
++    m_width = width;
++    m_height = height;
++    // create window and graphics system objects and exchange handles
++    m_pWindowSystem = new VFBWindowSystem(displayname, width, height, m_pScene);
++    m_pGraphicSystem = new MXGALGraphicsystem(width,height);
++
++    if (!m_pWindowSystem->init(m_pGraphicSystem))
++    {
++        goto fail; // TODO bad style
++    }
++
++    m_pGraphicSystem->setBaseWindowSystem(m_pWindowSystem);
++
++    binder = new VFBMXGAL;
++    if ( binder )
++    {
++        m_pGraphicSystem->setTextureBinder(binder);
++        ((VFBMXGAL*)binder)->setGraphicSystem(m_pGraphicSystem);
++
++        if (!m_pWindowSystem->start())
++        {
++            goto fail; // TODO bad style
++        }
++    }
++    else
++    {
++        goto fail; // TODO bad style
++    }
++    return true;
++
++    fail: // TODO bad style
++
++    LOG_ERROR("VFBMXGALRenderer", "Initialization failed !");
++    return false;
++}
++
++void VFBMXGALRenderer::stop()
++{
++    m_pWindowSystem->stop();
++}
++
++void VFBMXGALRenderer::doScreenShot(std::string fileToSave)
++{
++    m_pWindowSystem->doScreenShot(fileToSave);
++}
++
++void VFBMXGALRenderer::doScreenShotOfLayer(std::string fileToSave, uint id)
++{
++    m_pWindowSystem->doScreenShotOfLayer(fileToSave,id);
++}
++
++void VFBMXGALRenderer::doScreenShotOfSurface(std::string fileToSave, uint id, uint layer_id)
++{
++    m_pWindowSystem->doScreenShotOfSurface(fileToSave,id,layer_id);
++}
++
++uint VFBMXGALRenderer::getNumberOfHardwareLayers(uint screenID)
++{
++    uint screen_id;
++    screen_id = screenID;
++
++    return 0; // TODO provide real value here
++}
++
++uint* VFBMXGALRenderer::getScreenResolution(uint screenID)
++{
++    uint screen_id;
++    screen_id = screenID;   
++    // TODO provide value of real screen here
++    uint * resolution = new uint[2];
++    resolution[0] = m_width;
++    resolution[1] = m_height;
++    return resolution;
++}
++
++uint* VFBMXGALRenderer::getScreenIDs(uint* length)
++{
++    uint numberOfScreens = 1;
++    uint* screenIDS = new uint[numberOfScreens];
++    for (uint i = 0; i < numberOfScreens; ++i)
++    {
++        screenIDS[i] = i;
++    }
++    *length = numberOfScreens;
++    return screenIDS;
++}
++
++void VFBMXGALRenderer::signalWindowSystemRedraw()
++{
++//TODO: remove empty
++}
++
++Shader* VFBMXGALRenderer::createShader(const string* vertexName, const string* fragmentName)  
++{
++    (void)vertexName; //remove warning
++    (void)fragmentName; //remove warning
++    //MXGAL does not support shaders
++    Shader *result = NULL;
++    return result;
++}
++
++void VFBMXGALRenderer::forceCompositionWindowSystem()
++{
++    m_pWindowSystem->m_damaged = true;
++}
++
++extern "C" BaseRenderer* createVFBMXGALRenderer(Scene* pScene){
++    return new VFBMXGALRenderer(pScene);
++}
++
++extern "C" void destroyVFBMXGALRenderer(VFBMXGALRenderer* p)
++{
++    delete p;
++}
+diff --git a/cmake/modules/FindMXGAL.cmake b/cmake/modules/FindMXGAL.cmake
+new file mode 100644
+index 0000000..6cfae00
+--- /dev/null
++++ b/cmake/modules/FindMXGAL.cmake
+@@ -0,0 +1,40 @@
++############################################################################
++# 
++# Copyright 2010, 2011 BMW Car IT GmbH
++# Copyright (C) 2012 Freescale Semiconductor, Inc.
++# 
++# 
++# Licensed under the Apache License, Version 2.0 (the "License"); 
++# you may not use this file except in compliance with the License. 
++# You may obtain a copy of the License at 
++#
++#		http://www.apache.org/licenses/LICENSE-2.0 
++#
++# Unless required by applicable law or agreed to in writing, software 
++# distributed under the License is distributed on an "AS IS" BASIS, 
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
++# See the License for the specific language governing permissions and 
++# limitations under the License.
++#
++############################################################################
++
++FIND_PATH(MXGAL_INCLUDE_DIR GAL/HAL/gc_hal.h
++/usr/include
++)
++
++FIND_LIBRARY(MXGAL_LIBRARY
++NAMES GAL 
++PATHS 
++)
++
++SET( MXGAL_FOUND "NO" )
++IF(MXGAL_LIBRARY)
++    SET( MXGAL_FOUND "YES" )
++    message(STATUS "Found GAL libs: ${MXGAL_LIBRARY}")
++    message(STATUS "Found GAL includes: ${MXGAL_INCLUDE_DIR}")
++ENDIF(MXGAL_LIBRARY)
++
++MARK_AS_ADVANCED(
++  MXGAL_INCLUDE_DIR
++  MXGAL_LIBRARY
++)
+-- 
+1.6.3.3
+

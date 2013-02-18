@@ -1,0 +1,32 @@
+From 5eb0d720df583848e459c4690a0d99c520d36972 Mon Sep 17 00:00:00 2001
+From: Adrian Alonso <aalonso@freescale.com>
+Date: Thu, 31 Jan 2013 18:32:12 -0600
+Subject: [PATCH] ilmClient: add pthread link dependency
+
+* ilmClient test app requires to link agaist pthread
+
+Signed-off-by: Adrian Alonso <aalonso@freescale.com>
+Upstream-Status: Pending
+---
+ LayerManagerClient/ilmClient/CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/LayerManagerClient/ilmClient/CMakeLists.txt b/LayerManagerClient/ilmClient/CMakeLists.txt
+index c8d941e..f1222b1 100644
+--- a/LayerManagerClient/ilmClient/CMakeLists.txt
++++ b/LayerManagerClient/ilmClient/CMakeLists.txt
+@@ -37,8 +37,8 @@ if (WITH_TESTS)
+ enable_testing()
+ 
+ add_executable(ilmClient_Test tests/IlmCommandTest.cpp)
+-target_link_libraries(ilmClient_Test ilmClient ${LIBS} gtest)
++target_link_libraries(ilmClient_Test ilmClient ${LIBS} gtest pthread)
+ 
+ add_test(ilmClient ilmClient_Test )
+ 
+-endif(WITH_TESTS) 
+\ No newline at end of file
++endif(WITH_TESTS) 
+-- 
+1.8.1
+

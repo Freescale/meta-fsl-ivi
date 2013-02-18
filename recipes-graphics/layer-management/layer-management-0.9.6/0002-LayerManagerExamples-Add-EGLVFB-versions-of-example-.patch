@@ -1,0 +1,2816 @@
+From f682c6954f0f229a568cb188cab6d903413472cd Mon Sep 17 00:00:00 2001
+From: Philip Hatcher <philip.hatcher@freecale.com>
+Date: Thu, 3 May 2012 10:11:26 -0500
+Subject: [PATCH 2/2] LayerManagerExamples: Add EGLVFB versions of example applications
+
+ - EGLVFBApplicationExample: port to VFB window system
+ - EGLVFBMockNavigation: port to VFB window system
+Upstream-Status: Pending
+---
+ .../EGLVFBApplicationExample/CMakeLists.txt        |   47 ++++
+ .../EGLVFBApplicationExample/include/egl_helper.h  |   33 +++
+ .../include/gles2application.h                     |   38 +++
+ .../src/eglVFB_application.cpp                     |   70 +++++
+ .../EGLVFBApplicationExample/src/egl_helper.cpp    |  170 +++++++++++++
+ .../src/gles2application.cpp                       |  266 ++++++++++++++++++++
+ .../EGLVFBMockNavigation/CMakeLists.txt            |   93 +++++++
+ .../EGLVFBMockNavigation/include/Argument.h        |   61 +++++
+ .../EGLVFBMockNavigation/include/Camera.h          |   46 ++++
+ .../EGLVFBMockNavigation/include/Car.h             |   46 ++++
+ .../EGLVFBMockNavigation/include/Ground.h          |   47 ++++
+ .../EGLVFBMockNavigation/include/House.h           |   54 ++++
+ .../EGLVFBMockNavigation/include/IRenderable.h     |   29 +++
+ .../EGLVFBMockNavigation/include/IUpdateable.h     |   29 +++
+ .../EGLVFBMockNavigation/include/MockNavi.h        |   51 ++++
+ .../EGLVFBMockNavigation/include/OpenGLES2App.h    |   74 ++++++
+ .../EGLVFBMockNavigation/include/ShaderBase.h      |   54 ++++
+ .../EGLVFBMockNavigation/include/ShaderLighting.h  |   38 +++
+ .../EGLVFBMockNavigation/include/Street.h          |   48 ++++
+ .../EGLVFBMockNavigation/include/vec.h             |  124 +++++++++
+ .../EGLVFBMockNavigation/src/Argument.cpp          |  118 +++++++++
+ .../EGLVFBMockNavigation/src/Camera.cpp            |   62 +++++
+ .../EGLVFBMockNavigation/src/Car.cpp               |   59 +++++
+ .../EGLVFBMockNavigation/src/Ground.cpp            |   73 ++++++
+ .../EGLVFBMockNavigation/src/House.cpp             |  104 ++++++++
+ .../EGLVFBMockNavigation/src/MockNavi.cpp          |  122 +++++++++
+ .../EGLVFBMockNavigation/src/OpenGLES2App.cpp      |  221 ++++++++++++++++
+ .../EGLVFBMockNavigation/src/ShaderBase.cpp        |  159 ++++++++++++
+ .../EGLVFBMockNavigation/src/ShaderLighting.cpp    |   66 +++++
+ .../EGLVFBMockNavigation/src/Street.cpp            |   83 ++++++
+ .../EGLVFBMockNavigation/src/main.cpp              |   69 +++++
+ 31 files changed, 2554 insertions(+), 0 deletions(-)
+ create mode 100644 LayerManagerExamples/EGLVFBApplicationExample/CMakeLists.txt
+ create mode 100644 LayerManagerExamples/EGLVFBApplicationExample/include/egl_helper.h
+ create mode 100644 LayerManagerExamples/EGLVFBApplicationExample/include/gles2application.h
+ create mode 100644 LayerManagerExamples/EGLVFBApplicationExample/src/eglVFB_application.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBApplicationExample/src/egl_helper.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBApplicationExample/src/gles2application.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/CMakeLists.txt
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/Argument.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/Camera.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/Car.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/Ground.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/House.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/IRenderable.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/IUpdateable.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/MockNavi.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/OpenGLES2App.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/ShaderBase.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/ShaderLighting.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/Street.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/include/vec.h
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/Argument.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/Camera.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/Car.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/Ground.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/House.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/MockNavi.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/OpenGLES2App.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/ShaderBase.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/ShaderLighting.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/Street.cpp
+ create mode 100644 LayerManagerExamples/EGLVFBMockNavigation/src/main.cpp
+
+diff --git a/LayerManagerExamples/EGLVFBApplicationExample/CMakeLists.txt b/LayerManagerExamples/EGLVFBApplicationExample/CMakeLists.txt
+new file mode 100644
+index 0000000..2d0791c
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBApplicationExample/CMakeLists.txt
+@@ -0,0 +1,47 @@
++############################################################################
++# 
++# Copyright 2010, 2011 BMW Car IT GmbH 
++# Copyright (C) 2012 Freescale Semiconductor, Inc.
++# 
++# 
++# Licensed under the Apache License, Version 2.0 (the "License"); 
++# you may not use this file except in compliance with the License. 
++# You may obtain a copy of the License at 
++#
++#		http://www.apache.org/licenses/LICENSE-2.0 
++#
++# Unless required by applicable law or agreed to in writing, software 
++# distributed under the License is distributed on an "AS IS" BASIS, 
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
++# See the License for the specific language governing permissions and 
++# limitations under the License.
++#
++############################################################################
++
++cmake_minimum_required (VERSION 2.6)
++
++include_directories ("include")
++include_directories ("../../LayerManagerClient/ilmClient/include")
++include_directories ("../LayerSceneDescriptionExample/include")
++include_directories ("../../LayerManagerUtils/include")
++
++link_directories ("${PROJECT_SOURCE_DIR}/LayerManagerUtils/bin")
++
++add_executable(EGLVFBApplicationExample src/egl_helper.cpp src/eglVFB_application.cpp src/gles2application.cpp)
++
++add_dependencies(EGLVFBApplicationExample ilmClient)
++add_dependencies(EGLVFBApplicationExample LayerManagerUtils)
++
++find_package (GLESv2 REQUIRED)
++include_directories(${GLESv2_INCLUDE_DIR})
++
++add_definitions("-DEGL_API_FB -DLINUX ")
++
++find_package (EGL REQUIRED)
++include_directories(${EGL_INCLUDE_DIR})
++
++
++set(LIBS ${LIBS} ${GLESv2_LIBRARIES} ${EGL_LIBRARY} LayerManagerUtils dl) 
++target_link_libraries(EGLVFBApplicationExample ${LIBS} ilmClient)
++
++install (TARGETS EGLVFBApplicationExample DESTINATION bin)
+diff --git a/LayerManagerExamples/EGLVFBApplicationExample/include/egl_helper.h b/LayerManagerExamples/EGLVFBApplicationExample/include/egl_helper.h
+new file mode 100644
+index 0000000..396dfc1
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBApplicationExample/include/egl_helper.h
+@@ -0,0 +1,33 @@
++/***************************************************************************
++*
++* Copyright 2010,2011 BMW Car IT GmbH
++* Copyright (C) 2012 Freescale Semiconductor, Inc.
++*
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*        http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*
++****************************************************************************/
++#ifndef _EGL_HELPER_H_
++#define _EGL_HELPER_H_
++
++#include "ilm_client.h"
++#include <EGL/egl.h>
++
++t_ilm_uint GetTickCount();
++t_ilm_bool createX11Context(t_ilm_int width, t_ilm_int height);
++t_ilm_bool createEGLContext(t_ilm_int width, t_ilm_int height);
++void destroyEglContext();
++void destroyX11Context();
++void swapBuffers();
++
++#endif /* _EGL_HELPER_H_ */
+diff --git a/LayerManagerExamples/EGLVFBApplicationExample/include/gles2application.h b/LayerManagerExamples/EGLVFBApplicationExample/include/gles2application.h
+new file mode 100644
+index 0000000..c51f2a8
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBApplicationExample/include/gles2application.h
+@@ -0,0 +1,38 @@
++/***************************************************************************
++*
++* Copyright 2010,2011 BMW Car IT GmbH
++*
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*        http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*
++****************************************************************************/
++#ifndef _GLES2APPLICATION_H_
++#define _GLES2APPLICATION_H_
++
++#include "ilm_client.h"
++#include <GLES2/gl2.h>
++
++t_ilm_bool initGlApplication();
++t_ilm_bool initShader();
++t_ilm_bool destroyShader();
++t_ilm_bool initVertexBuffer();
++
++void attachVertexBuffer();
++void detachVertexBuffer();
++void destroyVertexBuffer();
++
++void draw(t_ilm_uint animTime);
++
++void destroyGlApplication();
++
++#endif /* _GLES2APPLICATION_H_ */
+diff --git a/LayerManagerExamples/EGLVFBApplicationExample/src/eglVFB_application.cpp b/LayerManagerExamples/EGLVFBApplicationExample/src/eglVFB_application.cpp
+new file mode 100644
+index 0000000..ef56bda
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBApplicationExample/src/eglVFB_application.cpp
+@@ -0,0 +1,70 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ * Copyright (C) 2012 Freescale Semiconductor, Inc.
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "ilm_client.h"
++#include "egl_helper.h"
++#include "gles2application.h"
++#include <stdio.h>
++#include <unistd.h>
++
++/********************* DEFINES **********************************************/
++// Max width and height of the window
++#define SURFACE_WIDTH  320
++#define SURFACE_HEIGHT 240
++
++#define LAYER_WIDTH    800
++#define LAYER_HEIGHT   480
++/****************************************************************************/
++
++/********************* TYPEDEFS **********************************************/
++
++/****************************************************************************/
++int main(void)
++{
++    printf("Starting demo EGL VFB Application Example\n");
++
++    if (ilm_init() == ILM_FAILED)
++    {
++        printf("Can't Init LayerManagement Communication\n");
++        return -1;
++    }
++
++    if (!createEGLContext(SURFACE_WIDTH, SURFACE_HEIGHT))
++    {
++        printf("Can't Create EGL Context\n");
++        return -1;
++    }
++
++    if (!initGlApplication())
++    {
++        printf("Can't Init GL Application\n");
++        return -1;
++    }
++
++    while (ILM_TRUE)
++    {
++        draw(33);
++        usleep(1000);
++    }
++
++    destroyEglContext();
++    destroyGlApplication();
++    ilm_destroy();
++    return 0;
++}
+diff --git a/LayerManagerExamples/EGLVFBApplicationExample/src/egl_helper.cpp b/LayerManagerExamples/EGLVFBApplicationExample/src/egl_helper.cpp
+new file mode 100644
+index 0000000..12e0dd2
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBApplicationExample/src/egl_helper.cpp
+@@ -0,0 +1,170 @@
++/**************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ * Copyright (C) 2012 Freescale Semiconductor, Inc.
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "egl_helper.h"
++#include "LayerScene.h"
++#include <stdlib.h>
++#include <stdio.h>
++#include <sys/time.h>
++
++typedef struct t_eglContextStruct
++{
++    EGLDisplay eglDisplay;
++    EGLConfig eglConfig;
++    EGLSurface eglSurface;
++    EGLContext eglContext;
++} EglContextStruct;
++
++static EglContextStruct g_eglContextStruct;
++
++EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
++
++
++t_ilm_bool createEGLContext(t_ilm_int width, t_ilm_int height)
++{
++    t_ilm_bool result = ILM_TRUE;
++    g_eglContextStruct.eglDisplay = NULL;
++    g_eglContextStruct.eglSurface = NULL;
++    g_eglContextStruct.eglContext = NULL;
++    ilmErrorTypes error = ILM_FAILED;
++
++
++    EGLNativeDisplayType native_display = fbGetDisplayByIndex(6);
++    EGLNativeWindowType  native_window  = fbCreateWindow(native_display, 0, 0, 0, 0);
++
++    g_eglContextStruct.eglDisplay = eglGetDisplay(native_display); // TODO: remove all C style casts in C++ code; use C++ casts
++
++    EGLint eglstatus = eglGetError();
++    if (!g_eglContextStruct.eglDisplay)
++    {
++        printf("Error: eglGetDisplay() failed.\n");
++    }
++
++    EGLint iMajorVersion, iMinorVersion;
++    if (!eglInitialize(g_eglContextStruct.eglDisplay, &iMajorVersion,
++            &iMinorVersion))
++    {
++        printf("Error: eglInitialize() failed.\n");
++    }
++    eglBindAPI(EGL_OPENGL_ES_API);
++    eglstatus = eglGetError();
++    if (eglstatus != EGL_SUCCESS)
++    {
++        printf("Error: eglBindAPI() failed.\n");
++    }
++
++    EGLint pi32ConfigAttribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_RENDERABLE_TYPE,
++                                   EGL_OPENGL_ES2_BIT, EGL_RED_SIZE, 8, EGL_ALPHA_SIZE, 8, EGL_NONE };
++    int iConfigs;
++
++    if (!eglChooseConfig(g_eglContextStruct.eglDisplay, pi32ConfigAttribs, &g_eglContextStruct.eglConfig, 1, &iConfigs) || (iConfigs != 1))
++    {
++        printf("Error: eglChooseConfig() failed.\n");
++    }
++
++    g_eglContextStruct.eglSurface = eglCreateWindowSurface(
++            g_eglContextStruct.eglDisplay, g_eglContextStruct.eglConfig,
++            (EGLNativeWindowType) native_window, NULL);
++    eglstatus = eglGetError();
++
++    if (eglstatus != EGL_SUCCESS)
++    {
++        printf("Error: eglCreateWindowSurface() failed.\n"); // TODO: do not use printf directly here
++    }
++
++    g_eglContextStruct.eglContext = eglCreateContext(
++            g_eglContextStruct.eglDisplay, g_eglContextStruct.eglConfig, NULL,
++            contextAttribs);
++
++    eglstatus = eglGetError();
++    if (eglstatus != EGL_SUCCESS)
++    {
++        printf("Error: eglCreateContext() failed.\n");
++    }
++
++    eglMakeCurrent(g_eglContextStruct.eglDisplay,
++            g_eglContextStruct.eglSurface, g_eglContextStruct.eglSurface,
++            g_eglContextStruct.eglContext);
++    eglSwapInterval(g_eglContextStruct.eglDisplay, 1);
++    eglstatus = eglGetError();
++    if (eglstatus != EGL_SUCCESS)
++    {
++        printf("Error: eglMakeCurrent() failed.\n");
++    }
++
++    // register surfaces to layermanager
++    t_ilm_layer layerid = (t_ilm_layer)LAYER_EXAMPLE_GLES_APPLICATIONS;
++    t_ilm_surface surfaceid = (t_ilm_surface)SURFACE_EXAMPLE_EGLX11_APPLICATION;
++
++    // TODO: if (error == ILM_FAILED) return ILM_FALSE;
++
++    printf("create a surface %lu\n", (t_ilm_nativehandle) 6);
++    error = ilm_surfaceCreate( (t_ilm_nativehandle) 6, width, height,
++            ILM_PIXELFORMAT_RGBA_8888, &surfaceid);
++
++    // TODO: if (error == ILM_FAILED) return ILM_FALSE;
++
++    printf("set surface dest region\n");
++    error = ilm_surfaceSetDestinationRectangle(surfaceid, 0, 0, width, height);
++
++    // TODO: if (error == ILM_FAILED) return ILM_FALSE;
++
++    printf("set surface src region\n");
++    error = ilm_surfaceSetSourceRectangle(surfaceid, 0, 0, width, height);
++
++    // TODO: if (error == ILM_FAILED) return ILM_FALSE;
++
++    printf("add surface to layer\n");
++    error = ilm_layerAddSurface(layerid, surfaceid);
++    printf("Set surface visible\n");
++    error = ilm_surfaceSetVisibility(surfaceid, ILM_TRUE);
++    printf("Set surface opacity\n");
++    error = ilm_surfaceSetOpacity(surfaceid, 0.75f);
++
++    //if (error == ILM_FAILED) return ILM_FALSE;
++
++    printf("commit\n");
++    error = ilm_commitChanges();
++
++    //if (error == ILM_FAILED) return ILM_FALSE;
++
++    return result;
++}
++
++void destroyEglContext()
++{
++    if (g_eglContextStruct.eglDisplay != NULL)
++    {
++        eglMakeCurrent(g_eglContextStruct.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
++        eglTerminate(g_eglContextStruct.eglDisplay);
++    }
++}
++
++
++t_ilm_uint GetTickCount()
++{
++    struct timeval ts;
++    gettimeofday(&ts, 0);
++    return (t_ilm_uint) (ts.tv_sec * 1000 + (ts.tv_usec / 1000));
++}
++
++void swapBuffers()
++{
++    eglSwapBuffers(g_eglContextStruct.eglDisplay, g_eglContextStruct.eglSurface);
++}
+diff --git a/LayerManagerExamples/EGLVFBApplicationExample/src/gles2application.cpp b/LayerManagerExamples/EGLVFBApplicationExample/src/gles2application.cpp
+new file mode 100644
+index 0000000..e189451
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBApplicationExample/src/gles2application.cpp
+@@ -0,0 +1,266 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "egl_helper.h"
++#include "gles2application.h"
++#include "IlmMatrix.h"
++#include <stdlib.h>
++#include <stdio.h>
++#include <math.h>
++
++typedef struct t_shaderObject
++{
++    GLuint fragmentShaderId;
++    GLuint vertexShaderId;
++    GLuint shaderProgramId;
++    GLint matrixLocation;
++    GLint colorLocation;
++} gles2Shader;
++
++typedef struct vertexBufferObject
++{
++    GLuint vbo;
++} gles2VertexBuffer;
++
++static gles2Shader shader;
++static gles2VertexBuffer vertexBuffer;
++
++// Fragment and vertex shaders code
++const char * sourceFragShader = "\
++        uniform mediump vec4    u_color;\
++        void main (void)\
++        {\
++                gl_FragColor = u_color;\
++        }";
++
++const char * sourceVertShader = "\
++        attribute highp vec4    a_vertex;\
++        uniform mediump mat4    u_matrix;\
++        void main(void)\
++        {\
++                gl_Position = u_matrix*a_vertex;\
++        }";
++
++GLfloat triangleVertexData[] =
++{
++        -0.4f, -0.4f, 0.0f, -0.2f, -0.4f, 0.0f, -0.3f, -0.2f, 0.0f,
++        -0.2f, -0.4f, 0.0f, -0.0f, -0.4f, 0.0f, -0.1f, -0.2f, 0.0f,
++        -0.0f, -0.4f, 0.0f,  0.2f, -0.4f, 0.0f,  0.1f, -0.2f, 0.0f,
++         0.2f, -0.4f, 0.0f,  0.4f, -0.4f, 0.0f,  0.3f, -0.2f, 0.0f,
++        -0.3f, -0.2f, 0.0f, -0.1f, -0.2f, 0.0f, -0.2f, -0.0f, 0.0f,
++         0.1f, -0.2f, 0.0f,  0.3f, -0.2f, 0.0f,  0.2f, -0.0f, 0.0f,
++        -0.2f, -0.0f, 0.0f, -0.0f, -0.0f, 0.0f, -0.1f,  0.2f, 0.0f,
++         0.0f, -0.0f, 0.0f,  0.2f, -0.0f, 0.0f,  0.1f,  0.2f, 0.0f,
++        -0.1f,  0.2f, 0.0f,  0.1f,  0.2f, 0.0f,  0.0f,  0.4f, 0.0f
++};
++
++t_ilm_bool initGlApplication()
++{
++    if (!initShader())
++    {
++        return ILM_FALSE;
++    }
++
++    if (!initVertexBuffer())
++    {
++        return ILM_FALSE;
++    }
++
++    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
++    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
++    glEnable(GL_BLEND);
++    return ILM_TRUE;
++}
++
++t_ilm_bool initShader()
++{
++    t_ilm_bool result = ILM_TRUE;
++
++    // Create the fragment shader object
++    shader.fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
++
++    // Load Fragment Source
++    glShaderSource(shader.fragmentShaderId, 1, (const char**) &sourceFragShader, NULL);
++
++    // Compile the source code of fragment shader
++    glCompileShader(shader.fragmentShaderId);
++
++    glGetShaderiv(shader.fragmentShaderId, GL_COMPILE_STATUS, (GLint*) &result);
++
++    if (!result)
++    {
++        t_ilm_int infoLength, numberChars;
++        glGetShaderiv(shader.fragmentShaderId, GL_INFO_LOG_LENGTH, &infoLength);
++
++        // Allocate Log Space
++        char* info = (char*) malloc(sizeof(char) * infoLength);
++        glGetShaderInfoLog(shader.fragmentShaderId, infoLength, &numberChars, info);
++
++        // Print the error
++        printf("Failed to compile fragment shader: %s\n", info);
++        free(info);
++        return ILM_FALSE;
++    }
++
++    // Create the fragment shader object
++    shader.vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
++
++    // Load Fragment Source
++    glShaderSource(shader.vertexShaderId, 1, (const char**) &sourceVertShader, NULL);
++
++    // Compile the source code of fragment shader
++    glCompileShader(shader.vertexShaderId);
++
++    glGetShaderiv(shader.vertexShaderId, GL_COMPILE_STATUS, (GLint*) &result);
++
++    if (!result)
++    {
++        t_ilm_int infoLength, numberChars;
++        glGetShaderiv(shader.vertexShaderId, GL_INFO_LOG_LENGTH, &infoLength);
++
++        // Allocate Log Space
++        char* info = (char*) malloc(sizeof(char) * infoLength);
++        glGetShaderInfoLog(shader.vertexShaderId, infoLength, &numberChars, info);
++
++        // Print the error
++        printf("Failed to compile vertex shader: %s\n", info);
++        free(info);
++        return ILM_FALSE;
++    }
++
++    shader.shaderProgramId = glCreateProgram();
++
++    glAttachShader(shader.shaderProgramId, shader.fragmentShaderId);
++    glAttachShader(shader.shaderProgramId, shader.vertexShaderId);
++
++    glBindAttribLocation(shader.shaderProgramId, 0, "a_vertex");
++
++    glLinkProgram(shader.shaderProgramId);
++
++    glGetProgramiv(shader.shaderProgramId, GL_LINK_STATUS, (GLint*) &result);
++
++    if (!result)
++    {
++        t_ilm_int infoLength, numberChars;
++        glGetShaderiv(shader.shaderProgramId, GL_INFO_LOG_LENGTH, &infoLength);
++
++        // Allocate Log Space
++        char* info = (char*) malloc(sizeof(char) * infoLength);
++        glGetShaderInfoLog(shader.shaderProgramId, infoLength, &numberChars,
++                info);
++
++        // Print the error
++        printf("Failed to link program: %s\n", info);
++        free(info);
++        return ILM_FALSE;
++    }
++    glUseProgram(shader.shaderProgramId);
++    shader.matrixLocation = glGetUniformLocation(shader.shaderProgramId, "u_matrix");
++    shader.colorLocation = glGetUniformLocation(shader.shaderProgramId, "u_color");
++    return result;
++}
++
++t_ilm_bool destroyShader()
++{
++    t_ilm_bool result = ILM_TRUE;
++    glDeleteProgram(shader.shaderProgramId);
++    glDeleteShader(shader.fragmentShaderId);
++    glDeleteShader(shader.vertexShaderId);
++    return result;
++}
++
++t_ilm_bool initVertexBuffer()
++{
++    t_ilm_bool result = ILM_TRUE;
++
++    glGenBuffers(1, &vertexBuffer.vbo);
++
++    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vbo);
++
++    unsigned int uiSize = 27 * (sizeof(GLfloat) * 3); // TODO: remove hard coded values
++    glBufferData(GL_ARRAY_BUFFER, uiSize, &triangleVertexData[0], GL_STATIC_DRAW);
++
++    return result;
++}
++
++void attachVertexBuffer()
++{
++    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.vbo);
++    glEnableVertexAttribArray(0);
++    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
++
++}
++
++void detachVertexBuffer()
++{
++    glBindBuffer(GL_ARRAY_BUFFER, 0);
++}
++
++void destroyVertexBuffer()
++{
++    glDeleteBuffers(1, &vertexBuffer.vbo);
++}
++
++void draw(t_ilm_uint animTime)
++{
++    static t_ilm_uint startTime = 0;
++    static t_ilm_uint currentTime = 0;
++    static float angle = 0;
++    IlmMatrix matrix;
++
++    currentTime = GetTickCount();
++
++    if ((currentTime - startTime) > animTime)
++    {
++        float currentAngle = 0;
++        int i = 0;
++        glClear(GL_COLOR_BUFFER_BIT);
++        glUseProgram(shader.shaderProgramId);
++        attachVertexBuffer();
++        for (i = 10; i > 0; i--)
++        {
++            currentAngle = angle - ((float) i) * 10.0f;
++            IlmMatrixIdentity(matrix);
++            IlmMatrixRotateZ(matrix, currentAngle);
++            float color[4] = { 0.0, 1.0, 1.0, 0.5 + (0.3 / (float) i) };
++            float lineColor[4] = { 0.0, 0.0, 0.0, 0.5 + (0.4 / (float) i) };
++
++            glUniformMatrix4fv(shader.matrixLocation, 1, GL_FALSE, &matrix.f[0]);
++            glUniform4fv(shader.colorLocation, 1, &color[0]);
++            glDrawArrays(GL_TRIANGLES, 0, 27); // TODO: remove hard coded values
++
++            glUniform4fv(shader.colorLocation, 1, &lineColor[0]);
++            int j = 0;
++            for (j = 0; j < 9; j++) // TODO: remove hard coded values
++            {
++                glDrawArrays(GL_LINE_LOOP, j * 3, 3); // TODO: remove hard coded values
++            }
++        }
++        angle += 10.0f;
++        detachVertexBuffer();
++        swapBuffers();
++        startTime = currentTime;
++    }
++
++}
++
++void destroyGlApplication()
++{
++    destroyShader();
++    destroyVertexBuffer();
++}
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/CMakeLists.txt b/LayerManagerExamples/EGLVFBMockNavigation/CMakeLists.txt
+new file mode 100644
+index 0000000..6379da6
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/CMakeLists.txt
+@@ -0,0 +1,93 @@
++############################################################################
++# 
++# Copyright 2010, 2011 BMW Car IT GmbH 
++# Copyright (C) 2012 Freescale Semiconductor, Inc.
++# 
++# 
++# Licensed under the Apache License, Version 2.0 (the "License"); 
++# you may not use this file except in compliance with the License. 
++# You may obtain a copy of the License at 
++#
++#		http://www.apache.org/licenses/LICENSE-2.0 
++#
++# Unless required by applicable law or agreed to in writing, software 
++# distributed under the License is distributed on an "AS IS" BASIS, 
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
++# See the License for the specific language governing permissions and 
++# limitations under the License.
++#
++############################################################################
++
++cmake_minimum_required (VERSION 2.6)
++
++find_package(GLESv2 REQUIRED)
++find_package(EGL REQUIRED)
++add_definitions("-DEGL_API_FB -DLINUX")
++
++
++include_directories(
++    ${GLESv2_INCLUDE_DIR}
++    ${EGL_INCLUDE_DIR}
++    "include"
++    "../../LayerManagerClient/ilmClient/include"
++    "../LayerSceneDescriptionExample/include"
++    "../../LayerManagerUtils/include"
++)
++
++link_directories(
++    "${PROJECT_SOURCE_DIR}/LayerManagerUtils/bin"
++)
++
++set (HEADER_FILES
++
++	include/Camera.h
++	include/Car.h
++    include/Argument.h
++	include/OpenGLES2App.h
++	include/Ground.h
++	include/House.h
++	include/IRenderable.h
++	include/IUpdateable.h
++	include/MockNavi.h
++	include/Street.h
++	include/ShaderBase.h
++	include/ShaderLighting.h
++)
++
++set (SRC_FILES
++
++	src/Camera.cpp
++	src/Car.cpp
++    src/Argument.cpp
++	src/OpenGLES2App.cpp
++	src/Ground.cpp
++	src/House.cpp
++	src/MockNavi.cpp
++	src/Street.cpp
++	src/ShaderBase.cpp
++	src/ShaderLighting.cpp
++	src/main.cpp
++)
++
++add_executable(EGLVFBMockNavigation
++    ${SRC_FILES}
++    ${HEADER_FILES}
++)
++
++add_dependencies(EGLVFBMockNavigation
++    ilmClient
++    EGLVFBMockNavigation LayerManagerUtils
++)
++
++set(LIBS
++	${LIBS}
++	${GLESv2_LIBRARIES}
++	${EGL_LIBRARY}
++	LayerManagerUtils
++	ilmClient
++        dl
++)
++
++target_link_libraries(EGLVFBMockNavigation ${LIBS})
++
++install (TARGETS EGLVFBMockNavigation DESTINATION bin)
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/Argument.h b/LayerManagerExamples/EGLVFBMockNavigation/include/Argument.h
+new file mode 100644
+index 0000000..0bca6f5
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/Argument.h
+@@ -0,0 +1,61 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _Argument_h
++#define _Argument_h
++
++#include <string>
++using std::string;
++
++class BoolArgument {
++public:
++    BoolArgument(string name, bool default_value, int argc, const char * const argv[]);
++    bool get();
++    
++private:
++    bool value;
++};
++
++class FloatArgument {
++public:
++    FloatArgument(string name, float default_value, int argc, const char * const argv[]);
++    float get();
++
++private:
++    float value;
++};
++
++class IntArgument {
++public:
++    IntArgument(string name, int default_value, int argc, const char * const argv[]);
++    int get();
++
++private:
++    int value;
++};
++
++class UnsignedIntArgument {
++public:
++    UnsignedIntArgument(string name, unsigned int default_value, int argc, const char * const argv[]);
++    unsigned int get();
++
++private:
++    unsigned int value;
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/Camera.h b/LayerManagerExamples/EGLVFBMockNavigation/include/Camera.h
+new file mode 100644
+index 0000000..5ec44cf
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/Camera.h
+@@ -0,0 +1,46 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _Camera_h
++#define _Camera_h
++
++#include "IUpdateable.h"
++#include "IlmMatrix.h"
++#include "vec.h"
++
++class Camera : public IUpdateable
++{
++public:
++    Camera(vec3f position, vec3f target, float viewportWidth, float viewportHeight);
++    virtual ~Camera();
++
++    IlmMatrix* getViewProjectionMatrix();
++    void update(int currentTimeInMs, int lastFrameTime);
++
++private:
++    vec3f m_position;
++    vec3f m_target;
++    IlmMatrix m_viewProjectionMatrix;
++	IlmMatrix m_translationMatrix;
++	IlmMatrix m_rotationMatrix;
++	IlmMatrix m_projectionMatrix;
++	IlmMatrix m_identityMatrix;
++	IlmMatrix eyeMatrix;
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/Car.h b/LayerManagerExamples/EGLVFBMockNavigation/include/Car.h
+new file mode 100644
+index 0000000..d495576
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/Car.h
+@@ -0,0 +1,46 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _Car_h
++#define _Car_h
++
++#include "IRenderable.h"
++#include "vec.h"
++
++class ShaderBase;
++
++class Car : public IRenderable
++{
++public:
++    Car(vec3f position, vec3f size, vec4f color, ShaderBase* shader);
++    virtual ~Car() {}
++    
++    virtual void render();
++    
++private:
++    vec3f m_position;
++    vec3f m_size;
++    vec4f m_color;
++    
++    vec3u m_index;
++    vec3f m_vertex[3];
++
++    ShaderBase* m_pShader;
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/Ground.h b/LayerManagerExamples/EGLVFBMockNavigation/include/Ground.h
+new file mode 100644
+index 0000000..2cf5d6b
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/Ground.h
+@@ -0,0 +1,47 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _Ground_h
++#define _Ground_h
++
++#include "IRenderable.h"
++#include "vec.h"
++
++class IlmMatrix;
++class ShaderBase;
++
++class Ground : public IRenderable
++{
++public:
++    Ground(vec3f position, vec3f size, vec4f color, ShaderBase* pShader);
++    virtual ~Ground() {}
++    
++    virtual void render();
++    
++private:
++    vec3f m_position;
++    vec3f m_size;
++    vec4f m_color;
++    
++    vec3u m_index[2];
++    vec3f m_vertex[4];
++
++    ShaderBase* m_pShader;
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/House.h b/LayerManagerExamples/EGLVFBMockNavigation/include/House.h
+new file mode 100644
+index 0000000..811a12c
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/House.h
+@@ -0,0 +1,54 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _MockNaviHouse_h
++#define _MockNaviHouse_h
++
++#include "IRenderable.h"
++#include "IUpdateable.h"
++#include "IlmMatrix.h"
++#include "vec.h"
++
++class ShaderBase;
++
++class House : public IRenderable, public IUpdateable
++{
++public:
++    House(vec3f position, vec3f size, vec4f houseColor, ShaderBase* pShader);
++    virtual ~House();
++
++    virtual void render();
++    virtual void update(int currentTimeInMs, int lastFrameTime);
++
++private:
++    void attachVertexBuffer();
++    void detachVertexBuffer();
++
++private:
++    vec3f m_position;
++    vec3f m_size;
++    vec4f m_color;
++    
++    vec3f m_normals[6];
++    vec3u m_index[12];
++    vec3f m_vertex[8];
++
++    ShaderBase* m_pShader;
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/IRenderable.h b/LayerManagerExamples/EGLVFBMockNavigation/include/IRenderable.h
+new file mode 100644
+index 0000000..0db7d63
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/IRenderable.h
+@@ -0,0 +1,29 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _IRenderable_h
++#define _IRenderable_h
++
++class IRenderable
++{
++public:
++    virtual ~IRenderable() {}
++    virtual void render() = 0;
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/IUpdateable.h b/LayerManagerExamples/EGLVFBMockNavigation/include/IUpdateable.h
+new file mode 100644
+index 0000000..ad2df52
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/IUpdateable.h
+@@ -0,0 +1,29 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _IUpdateable_h
++#define _IUpdateable_h
++
++class IUpdateable
++{
++public:
++    virtual ~IUpdateable() {}
++    virtual void update(int currentTimeInMs, int lastFrameTime) = 0;
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/MockNavi.h b/LayerManagerExamples/EGLVFBMockNavigation/include/MockNavi.h
+new file mode 100644
+index 0000000..30f9324
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/MockNavi.h
+@@ -0,0 +1,51 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _MockNavi_h
++#define _MockNavi_h
++
++#include "OpenGLES2App.h"
++#include "IRenderable.h"
++#include "IUpdateable.h"
++#include "Camera.h"
++
++#include <list>
++using std::list;
++
++class MockNaviHouse;
++
++class MockNavi : public OpenGLES2App
++{
++public:
++    MockNavi(float fps, float animationSpeed, SurfaceConfiguration* config);
++    
++    virtual void update(int currentTimeInMs, int lastFrameTime);
++    virtual void render();
++
++private:
++    void generateCity();
++
++private:
++    Camera m_camera;
++    int lastUpdateTime;
++    int m_houseCount;
++    list<IRenderable*> m_renderList;
++    list<IUpdateable*> m_updateList;
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/OpenGLES2App.h b/LayerManagerExamples/EGLVFBMockNavigation/include/OpenGLES2App.h
+new file mode 100644
+index 0000000..caba954
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/OpenGLES2App.h
+@@ -0,0 +1,74 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ * Copyright (C) 2012 Freescale Semiconductor, Inc.
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _OpenGLES2App_h
++#define _OpenGLES2App_h
++
++#include <GLES2/gl2.h>
++
++#include <EGL/egl.h>
++
++struct SurfaceConfiguration
++{
++    unsigned int layerId;
++    unsigned int surfaceId;
++    unsigned int surfaceWidth;
++    unsigned int surfaceHeight;
++};
++
++class OpenGLES2App
++{
++public:
++    OpenGLES2App(float fps, float animationSpeed, SurfaceConfiguration* config);
++    virtual ~OpenGLES2App();
++
++    void mainloop();
++
++protected:
++    virtual void update(int currentTimeInMs, int elapsedTimeInMs) = 0;
++    virtual void render() = 0;
++	void swapBuffers();
++
++private:
++	bool createEGLContext();
++	void destroyEglContext();
++
++	bool setupLayerMangement(SurfaceConfiguration* config);
++
++	unsigned int GetTickCount();
++
++protected:
++    float m_framesPerSecond;
++    float m_animationSpeed;
++    unsigned int m_timerIntervalInMs;
++
++    struct EglContextStruct
++    {
++        EGLDisplay eglDisplay;
++        EGLConfig eglConfig;
++        EGLSurface eglSurface;
++        EGLContext eglContext;
++    };
++
++    EglContextStruct m_eglContextStruct;
++
++
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/ShaderBase.h b/LayerManagerExamples/EGLVFBMockNavigation/include/ShaderBase.h
+new file mode 100644
+index 0000000..cc4878b
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/ShaderBase.h
+@@ -0,0 +1,54 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef __SHADERBASE_H__
++#define __SHADERBASE_H__
++
++#include "vec.h"
++
++#include <string>
++using std::string;
++
++class IlmMatrix;
++
++class ShaderBase
++{
++public:
++	ShaderBase(string vertexCode, string fragmentCode, IlmMatrix* projectionMatrix);
++	virtual ~ShaderBase();
++	virtual void use(vec3f* position, vec4f* color);
++
++protected:
++    unsigned int shaderProgramId;
++
++private:
++    unsigned int fragmentShaderId;
++    unsigned int vertexShaderId;
++    int m_uniformProjectionMatrix;
++
++private:
++	bool initShader();
++	bool destroyShader();
++
++private:
++	string m_vertexCode;
++	string m_fragmentCode;
++	IlmMatrix* m_projectionMatrix;
++};
++
++#endif // __SHADERBASE_H__
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/ShaderLighting.h b/LayerManagerExamples/EGLVFBMockNavigation/include/ShaderLighting.h
+new file mode 100644
+index 0000000..c4bef2a
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/ShaderLighting.h
+@@ -0,0 +1,38 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef SHADERLIGHTING_H_
++#define SHADERLIGHTING_H_
++
++#include "ShaderBase.h"
++
++class ShaderLighting: public ShaderBase {
++public:
++	ShaderLighting(IlmMatrix* projectionMatrix);
++	virtual ~ShaderLighting();
++
++	virtual void use(vec3f* position, vec4f* color);
++
++private:
++	vec3f* m_pPosition;
++	vec4f* m_pColor;
++	int m_uniformModelMatrix;
++	int m_uniformColor;
++};
++
++#endif /* SHADERLIGHTING_H_ */
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/Street.h b/LayerManagerExamples/EGLVFBMockNavigation/include/Street.h
+new file mode 100644
+index 0000000..40d54bd
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/Street.h
+@@ -0,0 +1,48 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _Street_h
++#define _Street_h
++
++#include "IRenderable.h"
++#include "IUpdateable.h"
++#include "vec.h"
++
++class ShaderBase;
++
++class Street : public IRenderable, public IUpdateable
++{
++public:
++    Street(vec3f position, vec3f size, vec4f color, ShaderBase* shader);
++    virtual ~Street() {}
++    
++    virtual void render();
++    virtual void update(int currentTimeInMs, int lastFrameTime);
++    
++private:
++    vec3f m_position;
++    vec3f m_size;
++    vec4f m_color;
++    
++    vec3u m_index[2];
++    vec3f m_vertex[4];
++
++    ShaderBase* m_shader;
++};
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/include/vec.h b/LayerManagerExamples/EGLVFBMockNavigation/include/vec.h
+new file mode 100644
+index 0000000..d068bb3
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/include/vec.h
+@@ -0,0 +1,124 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#ifndef _vec_h
++#define _vec_h
++
++#include <GLES2/gl2.h>
++
++template <class T>
++class vec2
++{
++public:
++    vec2()
++    {
++    }
++    
++    vec2(T _x, T _y)
++    : x(_x)
++    , y(_y)
++    {
++    }
++    
++    struct
++    {
++        T x;
++        T y;
++    };
++};
++
++template <class T>
++class vec3
++{
++public:
++    vec3()
++    {
++    }
++    
++    vec3(T _x, T _y, T _z)
++    : x(_x)
++    , y(_y)
++    , z(_z)
++    {
++    }
++    
++    union
++    {
++        struct
++        {
++            T x;
++            T y;
++            T z;
++        };
++        struct
++        {
++            T r;
++            T g;
++            T b;
++        };
++    };
++};
++
++template <class T>
++class vec4
++{
++public:
++    vec4()
++    {
++    }
++
++    vec4(T _x, T _y, T _z, T _w)
++    : x(_x)
++    , y(_y)
++    , z(_z)
++    , w(_w)
++    {
++    }
++    
++    union
++    {
++        struct
++        {
++            T x;
++            T y;
++            T z;
++            T w;
++        };
++        struct
++        {
++            T r;
++            T g;
++            T b;
++            T a;
++        };
++    };
++};
++
++typedef vec2<GLfloat> vec2f;
++typedef vec2<GLint>   vec2i;
++typedef vec2<GLuint>  vec2u;
++
++typedef vec3<GLfloat> vec3f;
++typedef vec3<GLint>   vec3i;
++typedef vec3<GLuint>  vec3u;
++
++typedef vec4<GLfloat> vec4f;
++typedef vec4<GLint>   vec4i;
++typedef vec4<GLuint>  vec4u;
++
++#endif
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/Argument.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/Argument.cpp
+new file mode 100644
+index 0000000..f3cbea0
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/Argument.cpp
+@@ -0,0 +1,118 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "Argument.h"
++#include <iostream>
++#include <stdlib.h>
++
++BoolArgument::BoolArgument(string name, bool default_value, int argc, const char * const argv[])
++: value(default_value)
++{
++    for (int arg = 1; arg < argc; ++arg) {
++        const char* lpArgNow = argv[arg];
++        
++        if ((lpArgNow[0] == '-') && (name == &lpArgNow[1])) {
++            value = !value;
++        }
++    }
++}
++
++bool BoolArgument::get()
++{
++    return value;
++}
++
++FloatArgument::FloatArgument(string name, float default_value, int argc, const char * const argv[])
++: value(default_value)
++{
++    for (int arg = 1; arg < argc; ++arg)
++    {
++        char dummy[] = "";
++        const char* lpArgNow = argv[arg];
++        const char* lpArgNext = dummy;
++
++        if (arg != argc - 1)
++        {
++            lpArgNext = argv[arg + 1];
++        }
++
++        if ((lpArgNow[0] == '-') && (name == &lpArgNow[1]))
++        {
++            value = atof(lpArgNext);
++        }
++    }
++}
++
++float FloatArgument::get()
++{
++    return value;
++}
++
++
++IntArgument::IntArgument(string name, int default_value, int argc, const char * const argv[])
++: value(default_value)
++{
++    for (int arg = 1; arg < argc; ++arg)
++    {
++        char dummy[] = "";
++        const char* lpArgNow = argv[arg];
++        const char* lpArgNext = dummy;
++
++        if (arg != argc - 1)
++        {
++            lpArgNext = argv[arg + 1];
++        }
++
++        if ((lpArgNow[0] == '-') && (name == &lpArgNow[1]))
++        {
++            value = atoi(lpArgNext);
++        }
++    }
++}
++
++int IntArgument::get()
++{
++    return value;
++}
++
++
++UnsignedIntArgument::UnsignedIntArgument(string name, unsigned int default_value, int argc, const char * const argv[])
++: value(default_value)
++{
++    for (int arg = 1; arg < argc; ++arg)
++    {
++        char dummy[] = "";
++        const char* lpArgNow = argv[arg];
++        const char* lpArgNext = dummy;
++
++        if (arg != argc - 1)
++        {
++            lpArgNext = argv[arg + 1];
++        }
++
++        if ((lpArgNow[0] == '-') && (name == &lpArgNow[1]))
++        {
++            value = atoll(lpArgNext);
++        }
++    }
++}
++
++unsigned int UnsignedIntArgument::get()
++{
++    return value;
++}
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/Camera.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/Camera.cpp
+new file mode 100644
+index 0000000..3ba753c
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/Camera.cpp
+@@ -0,0 +1,62 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "Camera.h"
++#include "vec.h"
++
++#include <math.h>
++
++#include <GLES2/gl2.h>
++#include <GLES2/gl2ext.h>
++
++Camera::Camera(vec3f position, vec3f target, float viewportWidth, float viewportHeight)
++: m_position(position)
++, m_target(target)
++{
++    IlmMatrixIdentity(m_identityMatrix);
++    IlmMatrixTranslation(m_translationMatrix, m_position.x, m_position.y, m_position.z);
++    IlmMatrixRotateX(m_rotationMatrix, 45.0);
++    IlmMatrixProjection(m_projectionMatrix,
++                        45.0,                          // field of view
++                        0.1f,                          // near
++                        1000.0f,                       // far
++                        viewportWidth/viewportHeight); // aspect ratio
++}
++
++Camera::~Camera()
++{
++}
++
++IlmMatrix* Camera::getViewProjectionMatrix()
++{
++    return &m_viewProjectionMatrix;
++}
++
++void Camera::update(int currentTimeInMs, int lastFrameTime)
++{
++    (void)currentTimeInMs; // prevent warning
++    (void)lastFrameTime; // prevent warning
++
++    IlmMatrixTranslation(m_translationMatrix, m_position.x, m_position.y, m_position.z);
++
++    m_viewProjectionMatrix = m_identityMatrix;
++    //IlmMatrixMultiply(m_viewProjectionMatrix, m_viewProjectionMatrix, m_rotationMatrix);
++    IlmMatrixMultiply(m_viewProjectionMatrix, m_viewProjectionMatrix, m_translationMatrix);
++    IlmMatrixMultiply(m_viewProjectionMatrix, m_viewProjectionMatrix, m_projectionMatrix);
++}
++
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/Car.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/Car.cpp
+new file mode 100644
+index 0000000..faab4e8
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/Car.cpp
+@@ -0,0 +1,59 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "Car.h"
++#include "ShaderBase.h"
++#include <string.h>
++
++#include <iostream>
++using std::cout;
++using std::endl;
++
++#include <GLES2/gl2.h>
++
++
++Car::Car(vec3f position, vec3f size, vec4f color, ShaderBase* shader)
++: m_position(position)
++, m_size(size)
++, m_color(color)
++, m_index(0, 1, 2)
++, m_pShader(shader)
++{
++	m_vertex[0].x = 0.0;
++	m_vertex[0].y = 0.0;
++	m_vertex[0].z = 0.0;
++    
++	m_vertex[1].x = 0.5 * m_size.x;
++	m_vertex[1].y = 0.0;
++	m_vertex[1].z = -m_size.z;
++    
++	m_vertex[2].x = m_size.x;
++	m_vertex[2].y = 0.0;
++	m_vertex[2].z = 0.0;
++}
++
++void Car::render()
++{
++    m_pShader->use(&m_position, &m_color);
++
++    // draw
++    glEnableVertexAttribArray(0);
++    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, m_vertex);
++    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, &m_index);
++}
++
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/Ground.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/Ground.cpp
+new file mode 100644
+index 0000000..f9674f6
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/Ground.cpp
+@@ -0,0 +1,73 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "Ground.h"
++#include "IlmMatrix.h"
++#include "ShaderLighting.h"
++
++#include <string.h>
++
++#include <iostream>
++using std::cout;
++using std::endl;
++
++#include <GLES2/gl2.h>
++
++
++Ground::Ground(vec3f position, vec3f size, vec4f color, ShaderBase* pShader)
++: m_position(position)
++, m_size(size)
++, m_color(color)
++, m_pShader(pShader)
++{
++	m_index[0] = vec3u(0, 1, 2);
++	m_index[1] = vec3u(2, 3, 0);
++    
++    //                             y  z
++    //     3-------------2         | /
++    //    /             /          |/
++    //   /             /           ------x
++    //  0-------------1
++    
++	m_vertex[0].x = m_position.x;
++	m_vertex[0].y = m_position.y;
++	m_vertex[0].z = m_position.z;
++    
++	m_vertex[1].x = m_position.x + m_size.x;
++	m_vertex[1].y = m_position.y;
++	m_vertex[1].z = m_position.z;
++    
++	m_vertex[2].x = m_position.x + m_size.x;
++	m_vertex[2].y = m_position.y;
++	m_vertex[2].z = m_position.z + m_size.z;
++    
++	m_vertex[3].x = m_position.x;
++	m_vertex[3].y = m_position.y;
++	m_vertex[3].z = m_position.z + m_size.z;
++}
++
++void Ground::render()
++{
++    m_pShader->use(&m_position, &m_color);
++
++    // draw
++    glEnableVertexAttribArray(0);
++    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, m_vertex);
++    glDrawElements(GL_TRIANGLES, 3 * sizeof(m_index)/sizeof(m_index[0]), GL_UNSIGNED_INT, m_index);
++}
++
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/House.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/House.cpp
+new file mode 100644
+index 0000000..ca74017
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/House.cpp
+@@ -0,0 +1,104 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "House.h"
++#include "IlmMatrix.h"
++#include "ShaderLighting.h"
++
++#include <string.h>
++#include <math.h>
++#include <limits.h>
++#include <stdlib.h>
++
++#include <iostream>
++using std::cout;
++using std::endl;
++
++#include <GLES2/gl2.h>
++
++House::House(vec3f position, vec3f size, vec4f houseColor, ShaderBase* pShader)
++: m_position(position)
++, m_size(size)
++, m_color(houseColor)
++, m_pShader(pShader)
++{
++	/*
++    //     5-------------6
++    //    /|            /|
++    //   / |           / |
++    //  1-------------2  |
++    //  |  |          |  |
++    //  |  |          |  |         x
++    //  |  |          |  |         |  z
++    //  |  4----------|--7         | /
++    //  | /           | /          |/
++    //  |/            |/            ------y
++    //  0-------------3
++    */
++
++	float height = 0.1 + 1.5 * random() / INT_MAX;
++
++    m_index[0] = vec3u(7, 4, 0); // bottom
++    m_index[1] = vec3u(0, 3, 7); // bottom
++    m_index[2]  = vec3u(3, 2, 6); // right
++    m_index[3]  = vec3u(6, 7, 3); // right
++    m_index[4]  = vec3u(7, 6, 5); // back
++    m_index[5]  = vec3u(5, 4, 7); // back
++    m_index[6]  = vec3u(4, 5, 1); // left
++    m_index[7]  = vec3u(1, 0, 4); // left
++    m_index[8]  = vec3u(5, 6, 2); // top
++    m_index[9]  = vec3u(2, 1, 5); // top
++    m_index[10] = vec3u(0, 1, 2); // front
++    m_index[11] = vec3u(2, 3, 0); // front
++
++
++	m_vertex[0].x =  0.0f;	m_vertex[0].y =  0.0f;		m_vertex[0].z =  1.0f;
++	m_vertex[1].x =  1.0f;	m_vertex[1].y =  0.0f;		m_vertex[1].z =  1.0f;
++	m_vertex[2].x =  1.0f;	m_vertex[2].y =  height;	m_vertex[2].z =  1.0f;
++	m_vertex[3].x =  0.0f;	m_vertex[3].y =  height;	m_vertex[3].z =  1.0f;
++	m_vertex[4].x =  0.0f;	m_vertex[4].y =  0.0f;		m_vertex[4].z =  0.0f;
++	m_vertex[5].x =  1.0f;	m_vertex[5].y =  0.0f;		m_vertex[5].z =  0.0f;
++	m_vertex[6].x =  1.0f;	m_vertex[6].y =  height;	m_vertex[6].z =  0.0f;
++	m_vertex[7].x =  0.0f;	m_vertex[7].y =  height;	m_vertex[7].z =  0.0f;
++}
++
++House::~House()
++{
++}
++
++void House::render()
++{
++    m_pShader->use(&m_position, &m_color);
++
++    // draw
++    glEnableVertexAttribArray(0);
++    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, m_vertex);
++    glDrawElements(GL_TRIANGLES, 3 * sizeof(m_index)/sizeof(m_index[0]), GL_UNSIGNED_INT, m_index);
++}
++
++void House::update(int currentTimeInMs, int lastFrameTime)
++{
++	(void)currentTimeInMs; //prevent warning
++
++	m_position.z += 0.0005f * (GLfloat)lastFrameTime;
++
++	if (m_position.z > 3.0)
++	{
++		m_position.z -= 15.0 * 2.0 * 1.0;
++	}
++}
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/MockNavi.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/MockNavi.cpp
+new file mode 100644
+index 0000000..5e155e0
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/MockNavi.cpp
+@@ -0,0 +1,122 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "MockNavi.h"
++
++#include "House.h"
++#include "Street.h"
++#include "Ground.h"
++#include "Car.h"
++#include "ShaderLighting.h"
++
++#include <stdlib.h>
++#include <limits.h>
++
++#define CITY_GRID_SIZE 1.0f
++
++MockNavi::MockNavi(float fps, float animationSpeed, SurfaceConfiguration* config)
++: OpenGLES2App(fps, animationSpeed, config)
++, m_camera(vec3f(-1.5 * CITY_GRID_SIZE, -0.1, 0.0), vec3f(0.0, 0.0, 0.0), config->surfaceWidth, config->surfaceHeight)
++, m_houseCount(15)
++{
++    generateCity();
++}
++
++void MockNavi::update(int currentTimeInMs, int lastFrameTime)
++{
++	m_camera.update(currentTimeInMs, lastFrameTime);
++
++	list<IUpdateable*>::const_iterator iter = m_updateList.begin();
++    list<IUpdateable*>::const_iterator iterEnd = m_updateList.end();
++    
++    for (; iter != iterEnd; ++iter)
++    {
++        (*iter)->update(currentTimeInMs, lastFrameTime);
++    }
++}
++
++void MockNavi::render()
++{
++    list<IRenderable*>::const_iterator iter = m_renderList.begin();
++    list<IRenderable*>::const_iterator iterEnd = m_renderList.end();
++        
++    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
++
++    for (; iter != iterEnd; ++iter)
++    {
++        (*iter)->render();
++    }
++}
++
++void MockNavi::generateCity()
++{
++	IlmMatrix* projection = m_camera.getViewProjectionMatrix();
++    ShaderLighting* pShader = new ShaderLighting(projection);
++
++    // generate base plate
++	vec4f groundColor(0.8, 0.8, 0.6, 1.0);
++    vec3f position = vec3f(0.0, -0.001, 0.0);
++    vec3f size = vec3f(CITY_GRID_SIZE * 3, 0.0, -CITY_GRID_SIZE * 2.0 * m_houseCount);
++    Ground* ground = new Ground(position, size, groundColor, pShader);
++    m_renderList.push_back(ground);
++
++    // generate street z direction
++    vec4f streetColor(0.0, 0.0, 0.0, 1.0);
++    vec3f streetPosition = vec3f(0.6 * CITY_GRID_SIZE, 0.0, 0.0);
++    vec3f streetSize = vec3f(CITY_GRID_SIZE * 0.6, 0.0, -CITY_GRID_SIZE * 2.0 * m_houseCount);
++    Street* obj = new Street(streetPosition, streetSize, streetColor, pShader);
++    m_renderList.push_back(obj);
++
++    // generate streets x direction
++    for (int z = 1; z < m_houseCount; ++z)
++    {
++        vec4f streetColor(0.0, 0.0, 0.0, 1.0);
++        vec3f streetPosition = vec3f(0.0, 0.0, 0.6 - z * CITY_GRID_SIZE);
++        vec3f streetSize = vec3f(CITY_GRID_SIZE * 3, 0.0, CITY_GRID_SIZE * 0.6);
++        Street* obj = new Street(streetPosition, streetSize, streetColor, pShader);
++        m_renderList.push_back(obj);
++        m_updateList.push_back(obj);
++    }
++
++    // generate car
++    vec3f carPosition(1.4 * CITY_GRID_SIZE, 0.001, -0.3);
++    vec3f carSize(0.2f, 0.2f, 0.3f);
++    vec4f carColor(0.7, 0.3, 0.3, 1.0);
++    Car* car = new Car(carPosition, carSize, carColor, pShader);
++    m_renderList.push_back(car);
++
++    // generate houses
++	vec4f houseColor(0.6, 0.6, 0.8, 1.0);
++    for (int x = 0; x < 2; ++x)
++    {
++        for (int z = 0; z < m_houseCount; ++z)
++        {
++            float posx = x * 2.0 * CITY_GRID_SIZE;
++            float posy = 0.0;
++            float posz = -z * 2.0 * CITY_GRID_SIZE;
++
++            vec3f housePosition(posx, posy, posz);
++            vec3f houseSize(1.0, 1.0, 1.0);
++
++            House* obj = new House(housePosition, houseSize, houseColor, pShader);
++
++            m_renderList.push_back(obj);
++            m_updateList.push_back(obj);
++        }
++    }
++}
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/OpenGLES2App.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/OpenGLES2App.cpp
+new file mode 100644
+index 0000000..31bf0f4
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/OpenGLES2App.cpp
+@@ -0,0 +1,221 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ * Copyright (C) 2012 Freescale Semiconductor, Inc.
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "OpenGLES2App.h"
++#include "LayerScene.h"
++#include <ilm_client.h>
++
++#include <iostream>
++using std::cout;
++using std::endl;
++
++#include <stdlib.h>
++#include <math.h>
++#include <sys/time.h>
++
++#define RUNTIME_IN_MS() (GetTickCount() - startTimeInMS)
++
++// Max width and height of the window
++#define LAYER_WIDTH    800
++#define LAYER_HEIGHT   480
++
++
++OpenGLES2App::OpenGLES2App(float fps, float animationSpeed, SurfaceConfiguration* config)
++: m_framesPerSecond(fps)
++, m_animationSpeed(animationSpeed)
++, m_timerIntervalInMs(1000.0 / m_framesPerSecond)
++{
++    ilm_init();
++    createEGLContext();
++    setupLayerMangement(config);
++
++    glClearColor(0.2f, 0.2f, 0.5f, 1.0f);
++    glDisable(GL_BLEND);
++
++    glClearDepthf(1.0f);
++    glDisable(GL_CULL_FACE);
++    glEnable(GL_DEPTH_TEST);
++    glDepthFunc(GL_LEQUAL);
++}
++
++OpenGLES2App::~OpenGLES2App()
++{
++    destroyEglContext();
++    ilm_destroy();
++}
++
++void OpenGLES2App::mainloop()
++{
++	unsigned int startTimeInMS = GetTickCount();
++    unsigned int frameStartTimeInMS = 0;
++    unsigned int renderTimeInMS = 0;
++    unsigned int frameEndTimeInMS = 0;
++    unsigned int frameTimeInMS = 0;
++
++    while (true)
++    {
++        frameTimeInMS = frameEndTimeInMS - frameStartTimeInMS;
++        frameStartTimeInMS = RUNTIME_IN_MS();
++
++        update(m_animationSpeed * frameStartTimeInMS, m_animationSpeed * frameTimeInMS);
++        render();
++        swapBuffers();
++
++        renderTimeInMS = RUNTIME_IN_MS() - frameStartTimeInMS;
++
++        if (renderTimeInMS < m_timerIntervalInMs)
++        {
++            usleep((m_timerIntervalInMs - renderTimeInMS) * 1000);
++        }
++
++        frameEndTimeInMS = RUNTIME_IN_MS();
++    }
++}
++
++
++bool OpenGLES2App::createEGLContext()
++{
++    t_ilm_bool result = ILM_TRUE;
++    m_eglContextStruct.eglDisplay = NULL;
++    m_eglContextStruct.eglSurface = NULL;
++    m_eglContextStruct.eglContext = NULL;
++
++    EGLNativeDisplayType native_display = fbGetDisplayByIndex(5);
++    EGLNativeWindowType  native_window  = fbCreateWindow(native_display, 0, 0, 0, 0);
++
++    m_eglContextStruct.eglDisplay = eglGetDisplay(native_display); // TODO: remove all C style casts in C++ code; use C++ casts
++    EGLint eglstatus = eglGetError();
++    if (!m_eglContextStruct.eglDisplay)
++    {
++    	cout << "Error: eglGetDisplay() failed.\n";
++    }
++
++    EGLint iMajorVersion, iMinorVersion;
++    if (!eglInitialize(m_eglContextStruct.eglDisplay, &iMajorVersion,
++            &iMinorVersion))
++    {
++    	cout << "Error: eglInitialize() failed.\n";
++    }
++    eglBindAPI(EGL_OPENGL_ES_API);
++    eglstatus = eglGetError();
++    if (eglstatus != EGL_SUCCESS)
++    {
++    	cout << "Error: eglBindAPI() failed.\n";
++    }
++
++    EGLint pi32ConfigAttribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_RENDERABLE_TYPE,
++                                   EGL_OPENGL_ES2_BIT, EGL_RED_SIZE, 8, EGL_ALPHA_SIZE, 8, EGL_DEPTH_SIZE, 1, EGL_NONE };
++    int iConfigs;
++
++    if (!eglChooseConfig(m_eglContextStruct.eglDisplay, pi32ConfigAttribs, &m_eglContextStruct.eglConfig, 1, &iConfigs) || (iConfigs != 1))
++    {
++    	cout << "Error: eglChooseConfig() failed.\n";
++    }
++
++    m_eglContextStruct.eglSurface = eglCreateWindowSurface(
++            m_eglContextStruct.eglDisplay, m_eglContextStruct.eglConfig,
++            native_window , NULL);
++    eglstatus = eglGetError();
++
++    if (eglstatus != EGL_SUCCESS)
++    {
++    	cout << "Error: eglCreateWindowSurface() failed.\n";
++    }
++
++    EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
++
++    m_eglContextStruct.eglContext = eglCreateContext(
++            m_eglContextStruct.eglDisplay, m_eglContextStruct.eglConfig, NULL,
++            contextAttribs);
++
++    eglstatus = eglGetError();
++    if (eglstatus != EGL_SUCCESS)
++    {
++    	cout << "Error: eglCreateContext() failed.\n";
++    }
++
++    eglMakeCurrent(m_eglContextStruct.eglDisplay,
++            m_eglContextStruct.eglSurface, m_eglContextStruct.eglSurface,
++            m_eglContextStruct.eglContext);
++    eglSwapInterval(m_eglContextStruct.eglDisplay, 1);
++    eglstatus = eglGetError();
++    if (eglstatus != EGL_SUCCESS)
++    {
++    	cout << "Error: eglMakeCurrent() failed.\n";
++    }
++
++    return result;
++}
++
++bool OpenGLES2App::setupLayerMangement(SurfaceConfiguration* config)
++{
++    ilmErrorTypes error = ILM_FAILED;
++
++    // register surfaces to layermanager
++    t_ilm_layer layerid = (t_ilm_layer)config->layerId;//LAYER_EXAMPLE_GLES_APPLICATIONS;
++    t_ilm_surface surfaceid = (t_ilm_surface)config->surfaceId;//SURFACE_EXAMPLE_EGLX11_APPLICATION;
++    int width = config->surfaceWidth;
++    int height = config->surfaceHeight;
++
++    cout << "creating surface " << surfaceid << "\n";
++    error = ilm_surfaceCreate( (t_ilm_nativehandle) 5, width, height,
++            ILM_PIXELFORMAT_RGBA_8888, &surfaceid);
++
++    cout << "set surface " << surfaceid << " dest region " << 0 << ", " << 0 << ", " << width << ", " << height << "\n";
++    error = ilm_surfaceSetDestinationRectangle(surfaceid, 0, 0, width, height);
++
++    cout << "set surface " << surfaceid << " src region " << 0 << ", " << 0 << ", " << width << ", " << height << "\n";
++    error = ilm_surfaceSetSourceRectangle(surfaceid, 0, 0, width, height);
++
++    cout << "Set surface " << surfaceid << " visible\n";
++    error = ilm_surfaceSetVisibility(surfaceid, ILM_TRUE);
++
++    cout << "Set surface " << surfaceid << " opacity 1.0\n";
++    error = ilm_surfaceSetOpacity(surfaceid, 1.0f);
++
++    cout << "add surface " << surfaceid << " to layer " << layerid << "\n";
++    error = ilm_layerAddSurface(layerid, surfaceid);
++
++    cout << "commit\n";
++    error = ilm_commitChanges();
++
++    return ILM_TRUE;
++}
++
++void OpenGLES2App::destroyEglContext()
++{
++    if (m_eglContextStruct.eglDisplay != NULL)
++    {
++        eglMakeCurrent(m_eglContextStruct.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
++        eglTerminate(m_eglContextStruct.eglDisplay);
++    }
++}
++
++
++unsigned int OpenGLES2App::GetTickCount()
++{
++    struct timeval ts;
++    gettimeofday(&ts, 0);
++    return (t_ilm_uint) (ts.tv_sec * 1000 + (ts.tv_usec / 1000));
++}
++
++void OpenGLES2App::swapBuffers()
++{
++    eglSwapBuffers(m_eglContextStruct.eglDisplay, m_eglContextStruct.eglSurface);
++}
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/ShaderBase.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/ShaderBase.cpp
+new file mode 100644
+index 0000000..166c19e
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/ShaderBase.cpp
+@@ -0,0 +1,159 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "ShaderBase.h"
++#include "IlmMatrix.h"
++#include <ilm_client.h>
++#include <GLES2/gl2.h>
++#include <stdlib.h>
++#include <iostream>
++using std::cout;
++
++ShaderBase::ShaderBase(string vertexCode, string fragmentCode, IlmMatrix* projectionMatrix)
++: m_vertexCode()
++, m_fragmentCode(fragmentCode)
++, m_projectionMatrix(projectionMatrix)
++{
++	m_vertexCode = "uniform mediump mat4 u_projectionMatrix;\n";
++	m_vertexCode += vertexCode;
++	initShader();
++}
++
++ShaderBase::~ShaderBase()
++{
++	destroyShader();
++}
++
++bool ShaderBase::initShader()
++{
++    t_ilm_bool result = ILM_TRUE;
++
++    // Create the fragment shader object
++    fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
++
++    // Load Fragment Source
++    const char* fragmentShaderCode = m_fragmentCode.c_str();
++    glShaderSource(fragmentShaderId, 1, &fragmentShaderCode, NULL);
++
++    // Compile the source code of fragment shader
++    glCompileShader(fragmentShaderId);
++
++    glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, (GLint*) &result);
++
++    if (!result)
++    {
++        t_ilm_int infoLength, numberChars;
++        glGetShaderiv(fragmentShaderId, GL_INFO_LOG_LENGTH, &infoLength);
++
++        // Allocate Log Space
++        char* info = (char*) malloc(sizeof(char) * infoLength);
++        glGetShaderInfoLog(fragmentShaderId, infoLength, &numberChars, info);
++
++        // Print the error
++        cout << "Failed to compile fragment shader: " << info << "\n";
++        free(info);
++        return ILM_FALSE;
++    }
++
++    // Create the fragment shader object
++    vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
++
++    // Load Fragment Source
++    const char* vertexShaderCode = m_vertexCode.c_str();
++    glShaderSource(vertexShaderId, 1, &vertexShaderCode, NULL);
++
++    // Compile the source code of fragment shader
++    glCompileShader(vertexShaderId);
++
++    glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, (GLint*) &result);
++
++    if (!result)
++    {
++        t_ilm_int infoLength, numberChars;
++        glGetShaderiv(vertexShaderId, GL_INFO_LOG_LENGTH, &infoLength);
++
++        // Allocate Log Space
++        char* info = (char*) malloc(sizeof(char) * infoLength);
++        glGetShaderInfoLog(vertexShaderId, infoLength, &numberChars, info);
++
++        // Print the error
++        cout << "Failed to compile vertex shader: " << info << "\n";
++        free(info);
++        return ILM_FALSE;
++    }
++
++    shaderProgramId = glCreateProgram();
++
++    glAttachShader(shaderProgramId, fragmentShaderId);
++    glAttachShader(shaderProgramId, vertexShaderId);
++
++    glBindAttribLocation(shaderProgramId, 0, "a_vertex");
++
++    glLinkProgram(shaderProgramId);
++
++    glGetProgramiv(shaderProgramId, GL_LINK_STATUS, (GLint*) &result);
++
++    if (!result)
++    {
++        t_ilm_int infoLength, numberChars;
++        glGetShaderiv(shaderProgramId, GL_INFO_LOG_LENGTH, &infoLength);
++
++        // Allocate Log Space
++        char* info = (char*) malloc(sizeof(char) * infoLength);
++        glGetShaderInfoLog(shaderProgramId, infoLength, &numberChars,
++                info);
++
++        // Print the error
++        cout << "Failed to link program: " << info << "\n";
++        free(info);
++        return ILM_FALSE;
++    }
++
++    glUseProgram(shaderProgramId);
++
++    m_uniformProjectionMatrix = glGetUniformLocation(shaderProgramId, "u_projectionMatrix");
++
++    if (result)
++    {
++    	cout << "Shader setup complete.\n";
++    }
++    else
++    {
++    	cout << "Shader setup failed.\n";
++    }
++
++    return result;
++}
++
++bool ShaderBase::destroyShader()
++{
++    t_ilm_bool result = ILM_TRUE;
++    glDeleteProgram(shaderProgramId);
++    glDeleteShader(fragmentShaderId);
++    glDeleteShader(vertexShaderId);
++    return result;
++}
++
++void ShaderBase::use(vec3f* position, vec4f* color)
++{
++	(void)position; // prevent warning
++	(void)color; // prevent warning
++
++	glUseProgram(shaderProgramId);
++	glUniformMatrix4fv(m_uniformProjectionMatrix, 1, GL_FALSE, m_projectionMatrix->f);
++}
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/ShaderLighting.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/ShaderLighting.cpp
+new file mode 100644
+index 0000000..94e49a8
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/ShaderLighting.cpp
+@@ -0,0 +1,66 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "ShaderLighting.h"
++#include "IlmMatrix.h"
++
++const char* vertexShaderCode =
++		    "attribute mediump vec4 a_vertex;                                 \
++		     uniform mediump mat4 u_modelMatrix;                              \
++		     varying mediump vec4 v_normal;                                   \
++             void main(void)                                                  \
++             {                                                                \
++                 gl_Position = u_projectionMatrix * u_modelMatrix * a_vertex; \
++		         v_normal = normalize(a_vertex);                              \
++             }";
++
++const char* fragmentShaderCode =
++		    "uniform mediump vec4 u_color;   \
++		     varying mediump vec4 v_normal;  \
++		     mediump vec4 lightPosition;     \
++             void main (void)                \
++		     {                               \
++		         lightPosition = normalize(vec4(-3.0, -5.0, 10.0, 1.0));   \
++		         gl_FragColor = max(dot(v_normal, lightPosition), 0.0) * 0.5 * u_color + 0.8 * u_color;   \
++		         gl_FragColor.a = 1.0;   \
++		     }";
++
++ShaderLighting::ShaderLighting(IlmMatrix* projectionMatrix)
++: ShaderBase(vertexShaderCode, fragmentShaderCode, projectionMatrix)
++{
++    glUseProgram(shaderProgramId);
++    m_uniformModelMatrix = glGetUniformLocation(shaderProgramId, "u_modelMatrix");
++    m_uniformColor = glGetUniformLocation(shaderProgramId, "u_color");
++}
++
++ShaderLighting::~ShaderLighting()
++{
++}
++
++void ShaderLighting::use(vec3f* position, vec4f* color)
++{
++	ShaderBase::use(position, color);
++
++    IlmMatrix translation;
++	IlmMatrixTranslation(translation, position->x, position->y, position->z);
++
++	glUseProgram(shaderProgramId);
++	glUniformMatrix4fv(m_uniformModelMatrix, 1, GL_FALSE, translation.f);
++    glUniform4fv(m_uniformColor, 1, &color->r);
++
++}
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/Street.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/Street.cpp
+new file mode 100644
+index 0000000..843da83
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/Street.cpp
+@@ -0,0 +1,83 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "Street.h"
++#include "IlmMatrix.h"
++#include "ShaderBase.h"
++
++#include <string.h>
++
++#include <iostream>
++using std::cout;
++using std::endl;
++
++#include <GLES2/gl2.h>
++
++
++Street::Street(vec3f position, vec3f size, vec4f color, ShaderBase* shader)
++: m_position(position)
++, m_size(size)
++, m_color(color)
++, m_shader(shader)
++{
++	m_index[0] = vec3u(0, 3, 2);
++	m_index[1] = vec3u(2, 1, 0);
++    
++    //                             y  z
++    //     3-------------2         | /
++    //    /             /          |/
++    //   /             /           ------x
++    //  0-------------1
++    
++	m_vertex[0].x = m_position.x;
++	m_vertex[0].y = m_position.y;
++	m_vertex[0].z = m_position.z;
++
++	m_vertex[1].x = m_position.x + m_size.x;
++	m_vertex[1].y = m_position.y;
++	m_vertex[1].z = m_position.z;
++    
++	m_vertex[2].x = m_position.x + m_size.x;
++	m_vertex[2].y = m_position.y;
++	m_vertex[2].z = m_position.z + m_size.z;
++    
++	m_vertex[3].x = m_position.x;
++	m_vertex[3].y = m_position.y;
++	m_vertex[3].z = m_position.z + m_size.z;
++}
++
++void Street::render()
++{
++    m_shader->use(&m_position, &m_color);
++
++    // draw
++    glEnableVertexAttribArray(0);
++    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, m_vertex);
++    glDrawElements(GL_TRIANGLES, 3 * sizeof(m_index)/sizeof(m_index[0]), GL_UNSIGNED_INT, m_index);
++}
++
++void Street::update(int currentTimeInMs, int lastFrameTime)
++{
++	(void)currentTimeInMs; //prevent warning
++	m_position.z += 0.0005 * lastFrameTime;
++
++	if (m_position.z > 3.0)
++	{
++		m_position.z -= 2 * 2.0;
++	}
++}
+diff --git a/LayerManagerExamples/EGLVFBMockNavigation/src/main.cpp b/LayerManagerExamples/EGLVFBMockNavigation/src/main.cpp
+new file mode 100644
+index 0000000..aef2baa
+--- /dev/null
++++ b/LayerManagerExamples/EGLVFBMockNavigation/src/main.cpp
+@@ -0,0 +1,69 @@
++/***************************************************************************
++ *
++ * Copyright 2010,2011 BMW Car IT GmbH
++ *
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *        http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ *
++ ****************************************************************************/
++#include "Argument.h"
++#include "MockNavi.h"
++#include "LayerScene.h"
++
++#include <iostream>
++using std::cout;
++
++#define DEFAULT_FPS      30.0
++#define DEFAULT_ANIM     1.0
++#define DEFAULT_LAYER    LAYER_EXAMPLE_GLES_APPLICATIONS
++#define DEFAULT_SURFACE  SURFACE_EXAMPLE_EGLX11_APPLICATION+1 
++#define DEFAULT_WIDTH    800
++#define DEFAULT_HEIGHT   480
++
++int main (int argc, const char * argv[])
++{
++    FloatArgument fps("fps", DEFAULT_FPS, argc, argv);
++    FloatArgument animSpeed("anim", DEFAULT_ANIM, argc, argv);
++    UnsignedIntArgument surfaceId("surface", DEFAULT_SURFACE, argc, argv);
++    UnsignedIntArgument layerId("layer", DEFAULT_LAYER, argc, argv);
++    IntArgument width("width", DEFAULT_WIDTH, argc, argv);
++    IntArgument height("height", DEFAULT_HEIGHT, argc, argv);
++    BoolArgument help("help", false, argc, argv);
++    
++    if (help.get())
++    {
++        cout << "\nUsage: " << argv[0] << " [options]\n"
++             << "possible options are:\n"
++             << "  -help         show this help text\n"
++             << "  -fps x        limit frames per second to x (default " << DEFAULT_FPS << ")\n"
++             << "  -anim x       set animation speed (default " << DEFAULT_ANIM << ")\n"
++             << "  -surface x    render to surface id x (default " << DEFAULT_SURFACE << ")\n"
++             << "  -layer x      add surface to layer x (default " << DEFAULT_LAYER << ")\n"
++             << "  -width x      set surface width to x (default " << DEFAULT_WIDTH << ")\n"
++             << "  -height x     set surface height to x (default " << DEFAULT_HEIGHT << ")\n\n";
++    }
++    else
++    {
++        SurfaceConfiguration config;
++        config.layerId = layerId.get();
++        config.surfaceId = surfaceId.get();
++        config.surfaceWidth = width.get();
++        config.surfaceHeight = height.get();
++
++        MockNavi navi(fps.get(), animSpeed.get(), &config);
++        navi.mainloop();
++    }
++
++    return 0;
++}
++
+-- 
+1.6.3.3
+

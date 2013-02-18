@@ -1,0 +1,43 @@
+From bb87919fb87469f3e5659e44d767b4ea16aedbad Mon Sep 17 00:00:00 2001
+From: Adrian Alonso <aalonso@freescale.com>
+Date: Mon, 11 Feb 2013 15:36:57 -0600
+Subject: [PATCH] config.h.cmake: add mx vfb config options
+
+* Add config options for
+  WITH_VFB_MX
+  WITH_MXGAL_LIB
+
+Signed-off-by: Adrian Alonso <aalonso@freescale.com>
+Upstream-Status: Pending
+---
+ config/res/config.h.cmake |   10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/config/res/config.h.cmake b/config/res/config.h.cmake
+index 829ea46..8f75910 100644
+--- a/config/res/config.h.cmake
++++ b/config/res/config.h.cmake
+@@ -89,6 +89,12 @@
+ // use automotive dlt for logging
+ #cmakedefine WITH_DLT
+ 
++// use MX Vitual Framebuffer
++#cmakedefine WITH_VFB_MX
++
++// use MXGAL lib
++#cmakedefine WITH_MXGAL_LIB
++
+ //-----------------------------------------------------------------------------
+ // human readable report
+ //-----------------------------------------------------------------------------
+@@ -112,4 +118,6 @@
+     LOG_DEBUG("Config", "WITH_WAYLAND_FBDEV  = ${WITH_WAYLAND_FBDEV}"); \
+     LOG_DEBUG("Config", "WITH_WAYLAND_X11    = ${WITH_WAYLAND_X11}"); \
+     LOG_DEBUG("Config", "WITH_XTHREADS       = ${WITH_XTHREADS}"); \
+-    LOG_DEBUG("Config", "WITH_DLT            = ${WITH_DLT}");
++    LOG_DEBUG("Config", "WITH_DLT            = ${WITH_DLT}"); \
++	LOG_DEBUG("Config", "WITH_VFB_MX         = ${WITH_VFB_MX}"); \
++	LOG_DEBUG("Config", "WITH_MXGAL_LIB      = ${WITH_MXGAL_LIB}");
+-- 
+1.7.10.4
+

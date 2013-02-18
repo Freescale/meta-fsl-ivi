@@ -1,0 +1,71 @@
+From 753d0cfaefb3c0f7a9bd4546958f361edab72c01 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fr=C3=A9d=C3=A9ric=20Blain?= <frederic.blain@valeo.com>
+Date: Mon, 6 Aug 2012 18:48:56 +0200
+Subject: [PATCH] Improve plugin search over specific filesystem type
+
+"man readdir" explains that only few filesystem type support a good filling of  "struct dirent.d_type". (nfs does not for instance)
+To be POSIX compliant, we should use stat() instead to look if a file is a regular file.
+
+This patch update getSharedLibrariesFromDirectory() to use  stat() when necessary & follow symlinks until reaching the real target.
+
+Upstream-Status: Backport 0.9.7
+---
+ LayerManagerService/src/main.cpp |   27 +++++++++++++++++++++++----
+ 1 file changed, 23 insertions(+), 4 deletions(-)
+
+diff --git a/LayerManagerService/src/main.cpp b/LayerManagerService/src/main.cpp
+index 6d38832..110ec7a 100644
+--- a/LayerManagerService/src/main.cpp
++++ b/LayerManagerService/src/main.cpp
+@@ -33,6 +33,7 @@
+ #include <libgen.h> // basename
+ #include <signal.h>
+ #include <execinfo.h> // for stacktrace
++#include <sys/stat.h>
+ 
+ #include <list>
+ using std::list;
+@@ -185,18 +186,36 @@ void getSharedLibrariesFromDirectory(tFileList& fileList, string dirName)
+         unsigned char entryType = itemInDirectory->d_type;
+         string entryName = itemInDirectory->d_name;
+ 
+-        bool regularFile = (entryType == DT_REG);
+-        bool linkToFile = (entryType == DT_LNK);
++        bool regularFile;
+         bool sharedLibExtension = ("so" == entryName.substr(entryName.find_last_of(".") + 1));
+ 
+-        if ((linkToFile || regularFile) && sharedLibExtension)
++        if ((entryType == DT_LNK) || (entryType == DT_UNKNOWN))
++        {
++            struct stat st;
++            string fpath = dirName + "/" + itemInDirectory->d_name;
++
++            if (!stat(fpath.c_str(), &st))
++                regularFile = S_ISREG(st.st_mode);
++            else
++            {
++                regularFile = false;
++                LOG_WARNING("LayerManagerService", "Could not stat() file " << fpath << ": " << errno);
++            }
++        }
++        else
++        {
++            regularFile = (entryType == DT_REG);
++        }
++
++
++        if (regularFile && sharedLibExtension)
+         {
+             LOG_DEBUG("LayerManagerService", "adding file " << entryName);
+             fileList.push_back(dirName + "/" + entryName);
+         }
+         else
+         {
+-            LOG_DEBUG("LayerManagerService", "ignoring file " << entryName);
++            LOG_DEBUG("LayerManagerService", "ignoring file " << entryName);;
+         }
+     }
+ 
+-- 
+1.7.10.4
+
