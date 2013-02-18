@@ -1,0 +1,10 @@
+[Unit]
+Description=iMX Virtual framebuffer
+
+[Service]
+Type=simple
+ExecStart=/etc/virtfb/virtfb.sh
+Enviroment=FB_MULTI_BUFFER=2
+
+[Install]
+WantedBy=multi-user.target
