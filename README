@@ -4,18 +4,72 @@ meta-fsl-ivi, Freescale In-Vehicle Infotainment
 This layer's purpose is to add specific Freescale support
 for In-Vehicle Infotainment based on GENIVI meta-ivi layer
 
+A distro configuration fsl-ivi-vfb: allows a user to enable
+Freescale MXGAL graphics backend for the Genivi LayerManager.
+
+The MXGAL graphics backend for the Genivi LayerManager enables the
+composition tasks of LayerManager to be accellerated using the 2D
+raster GPU present on the Freescale i.MX6 processors.
+
 Layer dependencies
-------------------
+=====================================================
 
 URI: git://git.yoctoproject.org/poky
-branch: danny
-revision: 47b0864fbd65746558d8186450c182d98bac78ca
+branch: master
+revision: 9be73af04f4121c6266b0c76b520bdb40f644eb8
 
 URI: git://git.yoctoproject.org/meta-fsl-arm
-branch: danny
-revision: 968409f066ad88cba500a585e2f6a9b680b8ff52
+branch: master
+revision: a0f089fdf75a1d40d394ab32d65930a1f629fef7
 
 URI: git://git.openembedded.org/meta-ivi
-branch: 3.0
-revision: 61c463f5626bed15e8c7b5a82e937aa9c1be2b29
+branch: 4.0
+revision: 5e8e209c666f5c596728c4589aaca964208cf5fb
 
+Build Genivi 4.0 p1 with MXGAL LayerManager backend
+=====================================================
+
+1. Source oe-init-build-env
+
+	source oe-init-build-env
+
+2. Add meta-fsl-ivi layer dependency paths to COREBASE/build/conf/bblayers.conf
+   in BBLAYERS variable.
+
+3. Set MACHINE ?= "imx6qsabreauto" in COREBASE/build/conf/local.conf
+
+4. Add INCOMPATIBLE_LICENSE = "GPLv3" in COREBASE/build/conf/local.conf file.
+
+5. Set DISTRO ?= "fsl-ivi-vfb" in COREBASE/build/conf/local.conf file.
+
+6. Add preferred u-boot version in COREBASE/build/conf/local.conf
+
+	UBOOT_SUFFIX = "bin"
+	UBOOT_PADDING = "2"
+	PREFERRED_PROVIDER_u-boot = "u-boot-imx"
+
+7. Accept End User License Agrement to use prebuilt GPU binaries
+   add in COREBASE/build/conf/local.conf
+
+	ACCEPT_FSL_EULA = "1"
+
+7. Build foton-image including GENIVI 4.0 (Foton) P1 components and MXGAL backend
+
+	bitbake foton-image
+
+Running MXGAL test applications
+=====================================================
+
+1. Deploy rootfs image into and sdcard
+
+	sudo dd if=foton-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
+
+2. Place SD on imx6sabreauto and poweron
+
+3. Start LayerManager
+
+	systemctl start layermanager.service
+
+4. Run test application
+
+	EGLVFBMockNavigation &
