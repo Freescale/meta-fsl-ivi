@@ -15,18 +15,18 @@ Layer dependencies
 =====================================================
 
 URI: git://git.yoctoproject.org/poky
-branch: master
-revision: 9be73af04f4121c6266b0c76b520bdb40f644eb8
+branch: dora
+revision: faf8f8660fae26a14578738b642fdeb08bcb9d54
 
 URI: git://git.yoctoproject.org/meta-fsl-arm
-branch: master
-revision: a0f089fdf75a1d40d394ab32d65930a1f629fef7
+branch: dora
+revision: 520339d3266bfd07bb2e593f70489efe4d98baa2
 
 URI: git://git.openembedded.org/meta-ivi
-branch: 4.0
-revision: 5e8e209c666f5c596728c4589aaca964208cf5fb
+branch: 5.0
+revision: 85bb8821f5db024a67270b5e32220ca9efb48ff9
 
-Build Genivi 4.0 p1 with MXGAL LayerManager backend
+Build Genivi 5.0 p1 with MXGAL LayerManager backend
 =====================================================
 
 1. Source oe-init-build-env
@@ -55,14 +55,14 @@ Build Genivi 4.0 p1 with MXGAL LayerManager backend
 
 7. Build foton-image including GENIVI 4.0 (Foton) P1 components and MXGAL backend
 
-	bitbake foton-image
+	bitbake gemini-image
 
 Running MXGAL test applications
 =====================================================
 
 1. Deploy rootfs image into and sdcard
 
-	sudo dd if=foton-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
+	sudo dd if=gemini-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
 
 2. Place SD on imx6sabreauto and poweron
 
