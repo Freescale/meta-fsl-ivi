@@ -53,7 +53,7 @@ Build Genivi 5.0 p1 with MXGAL LayerManager backend
 
 	ACCEPT_FSL_EULA = "1"
 
-7. Build foton-image including GENIVI 4.0 (Foton) P1 components and MXGAL backend
+7. Build genimi-image including GENIVI 5.0 (Gemini) P1 components and MXGAL backend
 
 	bitbake gemini-image
 
