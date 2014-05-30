@@ -1,6 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 PRINC := "${@int(PRINC) + 0}"
 
-DEPENDS_mx6 = "virtual/egl virtual/libgles2"
+# Set EGL/eglvivante.h platform
+OECMAKE_CXX_FLAGS_append_mx6 = " -DLINUX"
 
 PACKAGE_ARCH_mx6 = "${MACHINE_ARCH}"
