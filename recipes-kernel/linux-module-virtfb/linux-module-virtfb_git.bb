@@ -10,6 +10,7 @@ PR = "r1"
 
 inherit module systemd
 
+SYSTEMD_PACKAGES = "${PN}-systemd"
 SYSTEMD_SERVICE = "virtfb.service"
 SYSTEMD_AUTO_ENABLE = "disable"
 
