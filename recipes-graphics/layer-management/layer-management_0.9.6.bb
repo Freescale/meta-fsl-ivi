@@ -38,6 +38,7 @@ S = "${WORKDIR}/git"
 
 inherit gettext cmake systemd
 
+SYSTEMD_PACKAGES = "${PN}-systemd"
 SYSTEMD_SERVICE = "layermanager.service"
 SYSTEMD_AUTO_ENABLE = "disable"
 
