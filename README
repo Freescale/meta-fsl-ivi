@@ -15,18 +15,30 @@ Layer dependencies
 =====================================================
 
 URI: git://git.yoctoproject.org/poky
-branch: master
-revision: 9be73af04f4121c6266b0c76b520bdb40f644eb8
+branch: danny
+meta
+meta-yocto
+meta-yocto-bsp    = "danny:70ca9ff6422a03c26cfa78e76f6334bcf3fe47ec"
+
+URI: git://git.openembedded.org/meta-openembedded.git
+branch: danny
+meta-openembedded/meta-oe
+meta-openembedded/meta-systemd = "danny:f00028caf257e386c0f3ae46bd4b3ba53dd0729d"
 
 URI: git://git.yoctoproject.org/meta-fsl-arm
-branch: master
-revision: a0f089fdf75a1d40d394ab32d65930a1f629fef7
+branch: danny
+meta-fsl-arm      = "danny:d1f1fe7599fa8204730fd018ef2a507b1d6e8aa2"
 
 URI: git://git.openembedded.org/meta-ivi
-branch: 4.0
-revision: 5e8e209c666f5c596728c4589aaca964208cf5fb
+branch: 3.0
+meta-ivi          = "3.0:c93d2cb4763eab05f179530e35bb08e38d54f4b2"
 
-Build Genivi 4.0 p1 with MXGAL LayerManager backend
+URI: git://github.com:Freescale/meta-fsl-ivi.git
+brach: 3.0
+meta-fsl-ivi      = "3.0:769b39643d4c9f993834c024e5753e98977715b9"
+
+
+Build Genivi 3.0 p1 with MXGAL LayerManager backend
 =====================================================
 
 1. Source oe-init-build-env
@@ -42,27 +54,21 @@ Build Genivi 4.0 p1 with MXGAL LayerManager backend
 
 5. Set DISTRO ?= "fsl-ivi-vfb" in COREBASE/build/conf/local.conf file.
 
-6. Add preferred u-boot version in COREBASE/build/conf/local.conf
-
-	UBOOT_SUFFIX = "bin"
-	UBOOT_PADDING = "2"
-	PREFERRED_PROVIDER_u-boot = "u-boot-imx"
-
-7. Accept End User License Agrement to use prebuilt GPU binaries
+6. Accept End User License Agrement to use prebuilt GPU binaries
    add in COREBASE/build/conf/local.conf
 
 	ACCEPT_FSL_EULA = "1"
 
-7. Build foton-image including GENIVI 4.0 (Foton) P1 components and MXGAL backend
+7. Build foton-image including GENIVI 3.0 (Excalibur) P1 components and MXGAL backend
 
-	bitbake foton-image
+	bitbake excalibur-image
 
 Running MXGAL test applications
 =====================================================
 
 1. Deploy rootfs image into and sdcard
 
-	sudo dd if=foton-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
+	sudo dd if=excalibur-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
 
 2. Place SD on imx6sabreauto and poweron
 
