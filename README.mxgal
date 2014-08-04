@@ -16,15 +16,15 @@ Layer dependencies
 
 URI: git://git.yoctoproject.org/poky
 branch: dora
-revision: faf8f8660fae26a14578738b642fdeb08bcb9d54
+revision: e72727500d678f6c94a8846079970593c177534a
 
 URI: git://git.yoctoproject.org/meta-fsl-arm
 branch: dora
-revision: 520339d3266bfd07bb2e593f70489efe4d98baa2
+revision: 5fdb620c09df11e70434092f675c891e0ba84108
 
 URI: git://git.openembedded.org/meta-ivi
 branch: 5.0
-revision: 85bb8821f5db024a67270b5e32220ca9efb48ff9
+revision: 4e70b36b61d294b22754d18b9316ee9f9f034ac1
 
 Build Genivi 5.0 p1 with MXGAL LayerManager backend
 =====================================================
@@ -42,13 +42,7 @@ Build Genivi 5.0 p1 with MXGAL LayerManager backend
 
 5. Set DISTRO ?= "fsl-ivi-vfb" in COREBASE/build/conf/local.conf file.
 
-6. Add preferred u-boot version in COREBASE/build/conf/local.conf
-
-	UBOOT_SUFFIX = "bin"
-	UBOOT_PADDING = "2"
-	PREFERRED_PROVIDER_u-boot = "u-boot-imx"
-
-7. Accept End User License Agrement to use prebuilt GPU binaries
+6. Accept End User License Agrement to use prebuilt GPU binaries
    add in COREBASE/build/conf/local.conf
 
 	ACCEPT_FSL_EULA = "1"
