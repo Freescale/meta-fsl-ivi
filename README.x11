@@ -1,0 +1,64 @@
+meta-fsl-ivi, Freescale In-Vehicle Infotainment
+=====================================================
+
+This layer's purpose is to add specific Freescale support
+for In-Vehicle Infotainment based on GENIVI meta-ivi layer
+with Layer-manager X11 backend support
+
+Layer dependencies
+=====================================================
+
+URI: git://git.yoctoproject.org/poky
+branch: dora
+revision: e72727500d678f6c94a8846079970593c177534a
+
+URI: git://git.yoctoproject.org/meta-fsl-arm
+branch: dora
+revision: 5fdb620c09df11e70434092f675c891e0ba84108
+
+URI: git://git.openembedded.org/meta-ivi
+branch: 5.0
+revision: 4e70b36b61d294b22754d18b9316ee9f9f034ac1
+
+Build Genivi 5.0 p1 with MXGAL LayerManager backend
+=====================================================
+
+1. Source oe-init-build-env
+
+	source oe-init-build-env
+
+2. Add meta-fsl-ivi layer dependency paths to COREBASE/build/conf/bblayers.conf
+   in BBLAYERS variable.
+
+3. Set MACHINE ?= "imx6qsabreauto" in COREBASE/build/conf/local.conf
+
+4. Add INCOMPATIBLE_LICENSE = "GPLv3" in COREBASE/build/conf/local.conf file.
+
+5. Set DISTRO ?= "poky-ivi-systemd" in COREBASE/build/conf/local.conf file.
+
+6. Accept End User License Agrement to use prebuilt GPU binaries
+   add in COREBASE/build/conf/local.conf
+
+	ACCEPT_FSL_EULA = "1"
+
+7. Build genimi-image including GENIVI 5.0 (Gemini) P1 components and MXGAL backend
+
+	bitbake gemini-image
+
+Running X11 test applications
+=====================================================
+
+1. Deploy rootfs image into and sdcard
+
+	sudo dd if=gemini-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
+
+2. Place SD on imx6sabreauto and poweron
+
+3. Start LayerManager
+
+	export DISPLAY=:0.0
+	systemctl start layermanager.service
+
+4. Run test application
+
+	EGLX11ApplicationExample &
