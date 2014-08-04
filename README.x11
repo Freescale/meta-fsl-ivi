@@ -1,0 +1,64 @@
+meta-fsl-ivi, Freescale In-Vehicle Infotainment
+=====================================================
+
+This layer's purpose is to add specific Freescale support
+for In-Vehicle Infotainment based on GENIVI meta-ivi layer
+with Layer-manager X11 backed support
+
+Layer dependencies
+=====================================================
+
+URI: git://git.yoctoproject.org/poky
+branch: dylan
+revision: 02037d7daa1a24aecccc527a1ee6e78e1ed7c9dd
+
+URI: git://git.yoctoproject.org/meta-fsl-arm
+branch: dylan
+revision: 24caed8ff6f6088033d00d4567f7a7cad7fd5dd3
+
+URI: git://git.openembedded.org/meta-ivi
+branch: 4.0
+revision: f906b053e56c3aa009b29359ea12d2a7b8a25d57
+
+Build Genivi 4.0 p1 with X11 LayerManager backend
+=====================================================
+
+1. Source oe-init-build-env
+
+	source oe-init-build-env
+
+2. Add meta-fsl-ivi layer dependency paths to COREBASE/build/conf/bblayers.conf
+   in BBLAYERS variable.
+
+3. Set MACHINE ?= "imx6qsabreauto" in COREBASE/build/conf/local.conf
+
+4. Add INCOMPATIBLE_LICENSE = "GPLv3" in COREBASE/build/conf/local.conf file.
+
+5. Set DISTRO ?= "poky-ivi-systemd" in COREBASE/build/conf/local.conf file.
+
+6. Accept End User License Agrement to use prebuilt GPU binaries
+   add in COREBASE/build/conf/local.conf
+
+	ACCEPT_FSL_EULA = "1"
+
+7. Build foton-image including GENIVI 4.0 (Foton) P1 components and MXGAL backend
+
+	bitbake foton-image
+
+Running X11 test applications
+=====================================================
+
+1. Deploy rootfs image into and sdcard
+
+	sudo dd if=foton-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
+
+2. Place SD on imx6sabreauto and poweron
+
+3. Start LayerManager
+
+	export DISPLAY=:0.0
+	systemctl start layermanager.service
+
+4. Run test application
+
+	EGLX11ApplicationExample &
