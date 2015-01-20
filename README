@@ -4,29 +4,25 @@ meta-fsl-ivi, Freescale In-Vehicle Infotainment
 This layer's purpose is to add specific Freescale support
 for In-Vehicle Infotainment based on GENIVI meta-ivi layer
 
-A distro configuration fsl-ivi-vfb: allows a user to enable
-Freescale MXGAL graphics backend for the Genivi LayerManager.
-
-The MXGAL graphics backend for the Genivi LayerManager enables the
-composition tasks of LayerManager to be accellerated using the 2D
-raster GPU present on the Freescale i.MX6 processors.
+A distro configuration poky-ivi-systemd: allows a user to enable
+Freescale Wayland graphics backend for the Genivi LayerManager.
 
 Layer dependencies
 =====================================================
 
 URI: git://git.yoctoproject.org/poky
-branch: dora
-revision: faf8f8660fae26a14578738b642fdeb08bcb9d54
+branch: dizzy
+revision: 9fc095a439c36014c73b3a8f240afba09fe0e4d7
 
 URI: git://git.yoctoproject.org/meta-fsl-arm
-branch: dora
-revision: 520339d3266bfd07bb2e593f70489efe4d98baa2
+branch: dizzy
+revision: 64752fbb49b16cad881a7b4d35fef3f8315a673f
 
 URI: git://git.openembedded.org/meta-ivi
-branch: 5.0
-revision: 85bb8821f5db024a67270b5e32220ca9efb48ff9
+branch: 7.0
+revision: 054f6ca8f17c2387d45049db5ac9450efe2f787b
 
-Build Genivi 5.0 p1 with MXGAL LayerManager backend
+Build Genivi 7.0.2 p1 with Wayland LayerManager backend
 =====================================================
 
 1. Source oe-init-build-env
@@ -40,31 +36,25 @@ Build Genivi 5.0 p1 with MXGAL LayerManager backend
 
 4. Add INCOMPATIBLE_LICENSE = "GPLv3" in COREBASE/build/conf/local.conf file.
 
-5. Set DISTRO ?= "fsl-ivi-vfb" in COREBASE/build/conf/local.conf file.
+5. Set DISTRO ?= "poky-ivi-systemd" in COREBASE/build/conf/local.conf file.
 
-6. Add preferred u-boot version in COREBASE/build/conf/local.conf
-
-	UBOOT_SUFFIX = "bin"
-	UBOOT_PADDING = "2"
-	PREFERRED_PROVIDER_u-boot = "u-boot-imx"
-
-7. Accept End User License Agrement to use prebuilt GPU binaries
+6. Accept End User License Agrement to use prebuilt GPU binaries
    add in COREBASE/build/conf/local.conf
 
 	ACCEPT_FSL_EULA = "1"
 
 7. Build genimi-image including GENIVI 5.0 (Gemini) P1 components and MXGAL backend
 
-	bitbake gemini-image
+	bitbake intrepid-image
 
-Running MXGAL test applications
+Running Wayland test applications
 =====================================================
 
 1. Deploy rootfs image into and sdcard
 
-	sudo dd if=gemini-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
+	sudo dd if=intrepid-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
 
-2. Place SD on imx6sabreauto and poweron
+2. Place SD on imx6sabreauto and power on
 
 3. Start LayerManager
 
