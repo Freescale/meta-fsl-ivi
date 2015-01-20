@@ -1,6 +1,6 @@
 PRINC := "${@int(PRINC) + 0}"
 
-FILESEXTRAPATHS := "${THISDIR}/${PN}"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 inherit systemd
 
