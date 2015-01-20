@@ -47,7 +47,7 @@ Build Genivi 7.0.2 p1 with MXGAL LayerManager backend
 
 	ACCEPT_FSL_EULA = "1"
 
-7. Build genimi-image including GENIVI 5.0 (Gemini) P1 components and MXGAL backend
+7. Build intrepid-image including GENIVI 7.0.2 P1 components and MXGAL backend
 
 	bitbake intrepid-image
 
