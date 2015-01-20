@@ -1,0 +1,69 @@
+meta-fsl-ivi, Freescale In-Vehicle Infotainment
+=====================================================
+
+This layer's purpose is to add specific Freescale support
+for In-Vehicle Infotainment based on GENIVI meta-ivi layer
+
+A distro configuration fsl-ivi-vfb: allows a user to enable
+Freescale MXGAL graphics backend for the Genivi LayerManager.
+
+The MXGAL graphics backend for the Genivi LayerManager enables the
+composition tasks of LayerManager to be accellerated using the 2D
+raster GPU present on the Freescale i.MX6 processors.
+
+Layer dependencies
+=====================================================
+
+URI: git://git.yoctoproject.org/poky
+branch: dizzy
+revision: 9fc095a439c36014c73b3a8f240afba09fe0e4d7
+
+URI: git://git.yoctoproject.org/meta-fsl-arm
+branch: dizzy
+revision: 64752fbb49b16cad881a7b4d35fef3f8315a673f
+
+URI: git://git.openembedded.org/meta-ivi
+branch: 7.0
+revision: 054f6ca8f17c2387d45049db5ac9450efe2f787b
+
+Build Genivi 7.0.2 p1 with MXGAL LayerManager backend
+=====================================================
+
+1. Source oe-init-build-env
+
+	source oe-init-build-env
+
+2. Add meta-fsl-ivi layer dependency paths to COREBASE/build/conf/bblayers.conf
+   in BBLAYERS variable.
+
+3. Set MACHINE ?= "imx6qsabreauto" in COREBASE/build/conf/local.conf
+
+4. Add INCOMPATIBLE_LICENSE = "GPLv3" in COREBASE/build/conf/local.conf file.
+
+5. Set DISTRO ?= "fsl-ivi-vfb" in COREBASE/build/conf/local.conf file.
+
+6. Accept End User License Agrement to use prebuilt GPU binaries
+   add in COREBASE/build/conf/local.conf
+
+	ACCEPT_FSL_EULA = "1"
+
+7. Build genimi-image including GENIVI 5.0 (Gemini) P1 components and MXGAL backend
+
+	bitbake intrepid-image
+
+Running MXGAL test applications
+=====================================================
+
+1. Deploy rootfs image into and sdcard
+
+	sudo dd if=intrepid-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
+
+2. Place SD on imx6sabreauto and power on
+
+3. Start LayerManager
+
+	systemctl start layermanager.service
+
+4. Run test application
+
+	EGLVFBMockNavigation &
