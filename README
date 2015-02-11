@@ -5,7 +5,7 @@ This layer's purpose is to add specific Freescale support
 for In-Vehicle Infotainment based on GENIVI meta-ivi layer
 
 A distro configuration poky-ivi-systemd: allows a user to enable
-Freescale Wayland graphics backend for the Genivi LayerManager.
+Freescale Wayland graphics backend for the Genivi IVI.
 
 Layer dependencies
 =====================================================
@@ -18,11 +18,19 @@ URI: git://git.yoctoproject.org/meta-fsl-arm
 branch: dizzy
 revision: 64752fbb49b16cad881a7b4d35fef3f8315a673f
 
-URI: git://git.openembedded.org/meta-ivi
+URI: git://git.openembedded.org/meta-ivi/meta-ivi
 branch: 7.0
 revision: 054f6ca8f17c2387d45049db5ac9450efe2f787b
 
-Build Genivi 7.0.2 p1 with Wayland LayerManager backend
+URI: git://git.openembedded.org/meta-ivi/meta-ivi-demo
+branch: 7.0
+revision: 054f6ca8f17c2387d45049db5ac9450efe2f787b
+
+URI: https://github.com/meta-qt5/meta-qt5.git
+branch: dizzy
+revision: 1cec680ca9bcd00caaede8fa3d0ff3a4317550dc
+
+Build Genivi 7.0.3 p1 with Wayland IVI Extension
 =====================================================
 
 1. Source oe-init-build-env
@@ -43,9 +51,9 @@ Build Genivi 7.0.2 p1 with Wayland LayerManager backend
 
 	ACCEPT_FSL_EULA = "1"
 
-7. Build intrepid-image including GENIVI 7.0.2 P1 components and Wayland backend
+7. Build ivi-image-demo including GENIVI 7.0.3 P1 components and Wayland backend
 
-	bitbake intrepid-image
+	bitbake ivi-image-demo
 
 Running Wayland test applications
 =====================================================
@@ -56,10 +64,4 @@ Running Wayland test applications
 
 2. Place SD on imx6sabreauto and power on
 
-3. Start LayerManager
-
-	systemctl start layermanager.service
-
-4. Run test application
-
-	EGLVFBMockNavigation &
+3. Run test application
