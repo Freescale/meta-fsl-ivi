@@ -60,8 +60,10 @@ Running Wayland test applications
 
 1. Deploy rootfs image into and sdcard
 
-	sudo dd if=intrepid-image-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
+	sudo dd if=ivi-image-demo-imx6qsabreauto.sdcard of=/dev/SDxx && sync && sync
 
 2. Place SD on imx6sabreauto and power on
 
-3. Run test application
+3. Run test application (on virtual terminal console):
+	export XDG_RUNTIME_DIR=/var/run/user/0
+	weston-launch
